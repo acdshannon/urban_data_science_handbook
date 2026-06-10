@@ -229,7 +229,7 @@ All 15 anchors were verified against the live web in June 2026 (three research p
 | GHSL UCDB | ✅ keyless, CC BY 4.0 | current version R2024A; watch for successor |
 | NYC 311 | ✅ keyless | dataset split (2010–19 / 2020–) — old tutorials' URLs are stale |
 | Inside Airbnb AMS | ✅ keyless, CC BY 4.0 | only trailing 12 months free → pin + mirror snapshot |
-| Melbourne pedestrians | ✅ keyless, CC BY 4.0 | history = archive ZIP + live API (two-step) |
+| Melbourne pedestrians | ✅ keyless, CC BY 4.0 | history = archive ZIP + live API (two-step); the live API serves a rolling ~2-year window, so Nov 2022 – Jun 2024 is currently unpublished — taught honestly in ch. 4 |
 | CDMX carpetas + CONAPO | ✅ keyless | geocoding partly to colonia centroids — note in text |
 | Tokyo MLIT N02 | ✅ keyless, CC BY-compatible | ODPT optional (registration, ~2-day approval) |
 | São Paulo OD + GTFS | ✅ OD keyless | **OD 2023 microdata now public** (use 2017+2023); GTFS needs free SPTrans account |
