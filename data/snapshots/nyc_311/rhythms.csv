@@ -1,0 +1,673 @@
+complaint_type,dow,hour,n
+HEAT/HOT WATER,0,0,2226
+HEAT/HOT WATER,0,1,1900
+HEAT/HOT WATER,0,10,4805
+HEAT/HOT WATER,0,11,4611
+HEAT/HOT WATER,0,12,4263
+HEAT/HOT WATER,0,13,4095
+HEAT/HOT WATER,0,14,3790
+HEAT/HOT WATER,0,15,3870
+HEAT/HOT WATER,0,16,3826
+HEAT/HOT WATER,0,17,3690
+HEAT/HOT WATER,0,18,3765
+HEAT/HOT WATER,0,19,3838
+HEAT/HOT WATER,0,2,1396
+HEAT/HOT WATER,0,20,3702
+HEAT/HOT WATER,0,21,3586
+HEAT/HOT WATER,0,22,3173
+HEAT/HOT WATER,0,23,2686
+HEAT/HOT WATER,0,3,1298
+HEAT/HOT WATER,0,4,1222
+HEAT/HOT WATER,0,5,1281
+HEAT/HOT WATER,0,6,1746
+HEAT/HOT WATER,0,7,2777
+HEAT/HOT WATER,0,8,3842
+HEAT/HOT WATER,0,9,4703
+HEAT/HOT WATER,1,0,2362
+HEAT/HOT WATER,1,1,1580
+HEAT/HOT WATER,1,10,5198
+HEAT/HOT WATER,1,11,5048
+HEAT/HOT WATER,1,12,4585
+HEAT/HOT WATER,1,13,4213
+HEAT/HOT WATER,1,14,4349
+HEAT/HOT WATER,1,15,4367
+HEAT/HOT WATER,1,16,4638
+HEAT/HOT WATER,1,17,4771
+HEAT/HOT WATER,1,18,4845
+HEAT/HOT WATER,1,19,5198
+HEAT/HOT WATER,1,2,1242
+HEAT/HOT WATER,1,20,5302
+HEAT/HOT WATER,1,21,4946
+HEAT/HOT WATER,1,22,4066
+HEAT/HOT WATER,1,23,3463
+HEAT/HOT WATER,1,3,1170
+HEAT/HOT WATER,1,4,1299
+HEAT/HOT WATER,1,5,1787
+HEAT/HOT WATER,1,6,2921
+HEAT/HOT WATER,1,7,4596
+HEAT/HOT WATER,1,8,4750
+HEAT/HOT WATER,1,9,5349
+HEAT/HOT WATER,2,0,2336
+HEAT/HOT WATER,2,1,1703
+HEAT/HOT WATER,2,10,5495
+HEAT/HOT WATER,2,11,5027
+HEAT/HOT WATER,2,12,4608
+HEAT/HOT WATER,2,13,4267
+HEAT/HOT WATER,2,14,4137
+HEAT/HOT WATER,2,15,4357
+HEAT/HOT WATER,2,16,4550
+HEAT/HOT WATER,2,17,4361
+HEAT/HOT WATER,2,18,4679
+HEAT/HOT WATER,2,19,4728
+HEAT/HOT WATER,2,2,1336
+HEAT/HOT WATER,2,20,5044
+HEAT/HOT WATER,2,21,4652
+HEAT/HOT WATER,2,22,3767
+HEAT/HOT WATER,2,23,3189
+HEAT/HOT WATER,2,3,1229
+HEAT/HOT WATER,2,4,1509
+HEAT/HOT WATER,2,5,2057
+HEAT/HOT WATER,2,6,3148
+HEAT/HOT WATER,2,7,4873
+HEAT/HOT WATER,2,8,5202
+HEAT/HOT WATER,2,9,5457
+HEAT/HOT WATER,3,0,2336
+HEAT/HOT WATER,3,1,1540
+HEAT/HOT WATER,3,10,4779
+HEAT/HOT WATER,3,11,4365
+HEAT/HOT WATER,3,12,4052
+HEAT/HOT WATER,3,13,3702
+HEAT/HOT WATER,3,14,3708
+HEAT/HOT WATER,3,15,3817
+HEAT/HOT WATER,3,16,4206
+HEAT/HOT WATER,3,17,4125
+HEAT/HOT WATER,3,18,4527
+HEAT/HOT WATER,3,19,4577
+HEAT/HOT WATER,3,2,1150
+HEAT/HOT WATER,3,20,4760
+HEAT/HOT WATER,3,21,4492
+HEAT/HOT WATER,3,22,3611
+HEAT/HOT WATER,3,23,2895
+HEAT/HOT WATER,3,3,1158
+HEAT/HOT WATER,3,4,1407
+HEAT/HOT WATER,3,5,1914
+HEAT/HOT WATER,3,6,3063
+HEAT/HOT WATER,3,7,4593
+HEAT/HOT WATER,3,8,4741
+HEAT/HOT WATER,3,9,5049
+HEAT/HOT WATER,4,0,2172
+HEAT/HOT WATER,4,1,1484
+HEAT/HOT WATER,4,10,5002
+HEAT/HOT WATER,4,11,4452
+HEAT/HOT WATER,4,12,4549
+HEAT/HOT WATER,4,13,4002
+HEAT/HOT WATER,4,14,3618
+HEAT/HOT WATER,4,15,3673
+HEAT/HOT WATER,4,16,3963
+HEAT/HOT WATER,4,17,4038
+HEAT/HOT WATER,4,18,4280
+HEAT/HOT WATER,4,19,4552
+HEAT/HOT WATER,4,2,1165
+HEAT/HOT WATER,4,20,4662
+HEAT/HOT WATER,4,21,4447
+HEAT/HOT WATER,4,22,3633
+HEAT/HOT WATER,4,23,3115
+HEAT/HOT WATER,4,3,1129
+HEAT/HOT WATER,4,4,1360
+HEAT/HOT WATER,4,5,1927
+HEAT/HOT WATER,4,6,2918
+HEAT/HOT WATER,4,7,4307
+HEAT/HOT WATER,4,8,4644
+HEAT/HOT WATER,4,9,5209
+HEAT/HOT WATER,5,0,2253
+HEAT/HOT WATER,5,1,1639
+HEAT/HOT WATER,5,10,4822
+HEAT/HOT WATER,5,11,4360
+HEAT/HOT WATER,5,12,4083
+HEAT/HOT WATER,5,13,3710
+HEAT/HOT WATER,5,14,3642
+HEAT/HOT WATER,5,15,3622
+HEAT/HOT WATER,5,16,3986
+HEAT/HOT WATER,5,17,3764
+HEAT/HOT WATER,5,18,3584
+HEAT/HOT WATER,5,19,3590
+HEAT/HOT WATER,5,2,1270
+HEAT/HOT WATER,5,20,3725
+HEAT/HOT WATER,5,21,3500
+HEAT/HOT WATER,5,22,3243
+HEAT/HOT WATER,5,23,2770
+HEAT/HOT WATER,5,3,1229
+HEAT/HOT WATER,5,4,1455
+HEAT/HOT WATER,5,5,1951
+HEAT/HOT WATER,5,6,2986
+HEAT/HOT WATER,5,7,4424
+HEAT/HOT WATER,5,8,4841
+HEAT/HOT WATER,5,9,4973
+HEAT/HOT WATER,6,0,2318
+HEAT/HOT WATER,6,1,1745
+HEAT/HOT WATER,6,10,4545
+HEAT/HOT WATER,6,11,4232
+HEAT/HOT WATER,6,12,4052
+HEAT/HOT WATER,6,13,4310
+HEAT/HOT WATER,6,14,3627
+HEAT/HOT WATER,6,15,3647
+HEAT/HOT WATER,6,16,3809
+HEAT/HOT WATER,6,17,3571
+HEAT/HOT WATER,6,18,3448
+HEAT/HOT WATER,6,19,3437
+HEAT/HOT WATER,6,2,1343
+HEAT/HOT WATER,6,20,3391
+HEAT/HOT WATER,6,21,3179
+HEAT/HOT WATER,6,22,2809
+HEAT/HOT WATER,6,23,2580
+HEAT/HOT WATER,6,3,1141
+HEAT/HOT WATER,6,4,1194
+HEAT/HOT WATER,6,5,1286
+HEAT/HOT WATER,6,6,1676
+HEAT/HOT WATER,6,7,2717
+HEAT/HOT WATER,6,8,4011
+HEAT/HOT WATER,6,9,4491
+Illegal Parking,0,0,6153
+Illegal Parking,0,1,4049
+Illegal Parking,0,10,8120
+Illegal Parking,0,11,8130
+Illegal Parking,0,12,7733
+Illegal Parking,0,13,7409
+Illegal Parking,0,14,7394
+Illegal Parking,0,15,7314
+Illegal Parking,0,16,7139
+Illegal Parking,0,17,7193
+Illegal Parking,0,18,7381
+Illegal Parking,0,19,7417
+Illegal Parking,0,2,2839
+Illegal Parking,0,20,7484
+Illegal Parking,0,21,9128
+Illegal Parking,0,22,7965
+Illegal Parking,0,23,6070
+Illegal Parking,0,3,2247
+Illegal Parking,0,4,2123
+Illegal Parking,0,5,2310
+Illegal Parking,0,6,4191
+Illegal Parking,0,7,5862
+Illegal Parking,0,8,7142
+Illegal Parking,0,9,7836
+Illegal Parking,1,0,4531
+Illegal Parking,1,1,3276
+Illegal Parking,1,10,8867
+Illegal Parking,1,11,8818
+Illegal Parking,1,12,8126
+Illegal Parking,1,13,7510
+Illegal Parking,1,14,6856
+Illegal Parking,1,15,6483
+Illegal Parking,1,16,6474
+Illegal Parking,1,17,7152
+Illegal Parking,1,18,7673
+Illegal Parking,1,19,7030
+Illegal Parking,1,2,2497
+Illegal Parking,1,20,7640
+Illegal Parking,1,21,8909
+Illegal Parking,1,22,7795
+Illegal Parking,1,23,5960
+Illegal Parking,1,3,1984
+Illegal Parking,1,4,2386
+Illegal Parking,1,5,3278
+Illegal Parking,1,6,4948
+Illegal Parking,1,7,8786
+Illegal Parking,1,8,10807
+Illegal Parking,1,9,10388
+Illegal Parking,2,0,4781
+Illegal Parking,2,1,2817
+Illegal Parking,2,10,8752
+Illegal Parking,2,11,9141
+Illegal Parking,2,12,8096
+Illegal Parking,2,13,7619
+Illegal Parking,2,14,7411
+Illegal Parking,2,15,6469
+Illegal Parking,2,16,6581
+Illegal Parking,2,17,7380
+Illegal Parking,2,18,7762
+Illegal Parking,2,19,7208
+Illegal Parking,2,2,2276
+Illegal Parking,2,20,7501
+Illegal Parking,2,21,8980
+Illegal Parking,2,22,8216
+Illegal Parking,2,23,6177
+Illegal Parking,2,3,2104
+Illegal Parking,2,4,2597
+Illegal Parking,2,5,3477
+Illegal Parking,2,6,5600
+Illegal Parking,2,7,9194
+Illegal Parking,2,8,11337
+Illegal Parking,2,9,10312
+Illegal Parking,3,0,5127
+Illegal Parking,3,1,3081
+Illegal Parking,3,10,8179
+Illegal Parking,3,11,7670
+Illegal Parking,3,12,7389
+Illegal Parking,3,13,7416
+Illegal Parking,3,14,7004
+Illegal Parking,3,15,6738
+Illegal Parking,3,16,6373
+Illegal Parking,3,17,7389
+Illegal Parking,3,18,7791
+Illegal Parking,3,19,7291
+Illegal Parking,3,2,2266
+Illegal Parking,3,20,7520
+Illegal Parking,3,21,8866
+Illegal Parking,3,22,7801
+Illegal Parking,3,23,5886
+Illegal Parking,3,3,1939
+Illegal Parking,3,4,2383
+Illegal Parking,3,5,3460
+Illegal Parking,3,6,5528
+Illegal Parking,3,7,9070
+Illegal Parking,3,8,10647
+Illegal Parking,3,9,9639
+Illegal Parking,4,0,4819
+Illegal Parking,4,1,2852
+Illegal Parking,4,10,8369
+Illegal Parking,4,11,8466
+Illegal Parking,4,12,8306
+Illegal Parking,4,13,7103
+Illegal Parking,4,14,6946
+Illegal Parking,4,15,6748
+Illegal Parking,4,16,6560
+Illegal Parking,4,17,7249
+Illegal Parking,4,18,7525
+Illegal Parking,4,19,7063
+Illegal Parking,4,2,2210
+Illegal Parking,4,20,7402
+Illegal Parking,4,21,8861
+Illegal Parking,4,22,7679
+Illegal Parking,4,23,5935
+Illegal Parking,4,3,1926
+Illegal Parking,4,4,2370
+Illegal Parking,4,5,3318
+Illegal Parking,4,6,5170
+Illegal Parking,4,7,9303
+Illegal Parking,4,8,10978
+Illegal Parking,4,9,10133
+Illegal Parking,5,0,5060
+Illegal Parking,5,1,2967
+Illegal Parking,5,10,8593
+Illegal Parking,5,11,8435
+Illegal Parking,5,12,8227
+Illegal Parking,5,13,8035
+Illegal Parking,5,14,7069
+Illegal Parking,5,15,6234
+Illegal Parking,5,16,6571
+Illegal Parking,5,17,7151
+Illegal Parking,5,18,7434
+Illegal Parking,5,19,6909
+Illegal Parking,5,2,2310
+Illegal Parking,5,20,7117
+Illegal Parking,5,21,8482
+Illegal Parking,5,22,7667
+Illegal Parking,5,23,6301
+Illegal Parking,5,3,1992
+Illegal Parking,5,4,2402
+Illegal Parking,5,5,3281
+Illegal Parking,5,6,4989
+Illegal Parking,5,7,8545
+Illegal Parking,5,8,10565
+Illegal Parking,5,9,9992
+Illegal Parking,6,0,5655
+Illegal Parking,6,1,3482
+Illegal Parking,6,10,7379
+Illegal Parking,6,11,7028
+Illegal Parking,6,12,7281
+Illegal Parking,6,13,6962
+Illegal Parking,6,14,6814
+Illegal Parking,6,15,6690
+Illegal Parking,6,16,6382
+Illegal Parking,6,17,6355
+Illegal Parking,6,18,6611
+Illegal Parking,6,19,6845
+Illegal Parking,6,2,2548
+Illegal Parking,6,20,7250
+Illegal Parking,6,21,8876
+Illegal Parking,6,22,8335
+Illegal Parking,6,23,6921
+Illegal Parking,6,3,2377
+Illegal Parking,6,4,2219
+Illegal Parking,6,5,2427
+Illegal Parking,6,6,4668
+Illegal Parking,6,7,5243
+Illegal Parking,6,8,6803
+Illegal Parking,6,9,7171
+Noise - Residential,0,0,21493
+Noise - Residential,0,1,16140
+Noise - Residential,0,10,3858
+Noise - Residential,0,11,4294
+Noise - Residential,0,12,4313
+Noise - Residential,0,13,4558
+Noise - Residential,0,14,5099
+Noise - Residential,0,15,5267
+Noise - Residential,0,16,5847
+Noise - Residential,0,17,6247
+Noise - Residential,0,18,6938
+Noise - Residential,0,19,7609
+Noise - Residential,0,2,10000
+Noise - Residential,0,20,8811
+Noise - Residential,0,21,10682
+Noise - Residential,0,22,13786
+Noise - Residential,0,23,12037
+Noise - Residential,0,3,7264
+Noise - Residential,0,4,5199
+Noise - Residential,0,5,4051
+Noise - Residential,0,6,3246
+Noise - Residential,0,7,3064
+Noise - Residential,0,8,3360
+Noise - Residential,0,9,3660
+Noise - Residential,1,0,9846
+Noise - Residential,1,1,6352
+Noise - Residential,1,10,3420
+Noise - Residential,1,11,3324
+Noise - Residential,1,12,3278
+Noise - Residential,1,13,3302
+Noise - Residential,1,14,3515
+Noise - Residential,1,15,3883
+Noise - Residential,1,16,4036
+Noise - Residential,1,17,4407
+Noise - Residential,1,18,4860
+Noise - Residential,1,19,5404
+Noise - Residential,1,2,4341
+Noise - Residential,1,20,6160
+Noise - Residential,1,21,6886
+Noise - Residential,1,22,8766
+Noise - Residential,1,23,7677
+Noise - Residential,1,3,3552
+Noise - Residential,1,4,3064
+Noise - Residential,1,5,3075
+Noise - Residential,1,6,2966
+Noise - Residential,1,7,3020
+Noise - Residential,1,8,3168
+Noise - Residential,1,9,3265
+Noise - Residential,2,0,6041
+Noise - Residential,2,1,4173
+Noise - Residential,2,10,2750
+Noise - Residential,2,11,2882
+Noise - Residential,2,12,3004
+Noise - Residential,2,13,3162
+Noise - Residential,2,14,3269
+Noise - Residential,2,15,3606
+Noise - Residential,2,16,3737
+Noise - Residential,2,17,4488
+Noise - Residential,2,18,5326
+Noise - Residential,2,19,5946
+Noise - Residential,2,2,2987
+Noise - Residential,2,20,6832
+Noise - Residential,2,21,7764
+Noise - Residential,2,22,9010
+Noise - Residential,2,23,8461
+Noise - Residential,2,3,2523
+Noise - Residential,2,4,2059
+Noise - Residential,2,5,1913
+Noise - Residential,2,6,2191
+Noise - Residential,2,7,2067
+Noise - Residential,2,8,2074
+Noise - Residential,2,9,2215
+Noise - Residential,3,0,6664
+Noise - Residential,3,1,4414
+Noise - Residential,3,10,2894
+Noise - Residential,3,11,2917
+Noise - Residential,3,12,2829
+Noise - Residential,3,13,2810
+Noise - Residential,3,14,2853
+Noise - Residential,3,15,3124
+Noise - Residential,3,16,3291
+Noise - Residential,3,17,3707
+Noise - Residential,3,18,4257
+Noise - Residential,3,19,4818
+Noise - Residential,3,2,3480
+Noise - Residential,3,20,5577
+Noise - Residential,3,21,6278
+Noise - Residential,3,22,8271
+Noise - Residential,3,23,7533
+Noise - Residential,3,3,2732
+Noise - Residential,3,4,2170
+Noise - Residential,3,5,2118
+Noise - Residential,3,6,2227
+Noise - Residential,3,7,2267
+Noise - Residential,3,8,2400
+Noise - Residential,3,9,2576
+Noise - Residential,4,0,5818
+Noise - Residential,4,1,4199
+Noise - Residential,4,10,2301
+Noise - Residential,4,11,2324
+Noise - Residential,4,12,2398
+Noise - Residential,4,13,2456
+Noise - Residential,4,14,2539
+Noise - Residential,4,15,2890
+Noise - Residential,4,16,3215
+Noise - Residential,4,17,3712
+Noise - Residential,4,18,4467
+Noise - Residential,4,19,4967
+Noise - Residential,4,2,3079
+Noise - Residential,4,20,6054
+Noise - Residential,4,21,7025
+Noise - Residential,4,22,9203
+Noise - Residential,4,23,8611
+Noise - Residential,4,3,2394
+Noise - Residential,4,4,2030
+Noise - Residential,4,5,1864
+Noise - Residential,4,6,2049
+Noise - Residential,4,7,2163
+Noise - Residential,4,8,2099
+Noise - Residential,4,9,2056
+Noise - Residential,5,0,7031
+Noise - Residential,5,1,5086
+Noise - Residential,5,10,2526
+Noise - Residential,5,11,2623
+Noise - Residential,5,12,2688
+Noise - Residential,5,13,2887
+Noise - Residential,5,14,3053
+Noise - Residential,5,15,3332
+Noise - Residential,5,16,3784
+Noise - Residential,5,17,4082
+Noise - Residential,5,18,4871
+Noise - Residential,5,19,5741
+Noise - Residential,5,2,3357
+Noise - Residential,5,20,6913
+Noise - Residential,5,21,8876
+Noise - Residential,5,22,12983
+Noise - Residential,5,23,14136
+Noise - Residential,5,3,2641
+Noise - Residential,5,4,2002
+Noise - Residential,5,5,1770
+Noise - Residential,5,6,2013
+Noise - Residential,5,7,2028
+Noise - Residential,5,8,1988
+Noise - Residential,5,9,2288
+Noise - Residential,6,0,12675
+Noise - Residential,6,1,9107
+Noise - Residential,6,10,3294
+Noise - Residential,6,11,3342
+Noise - Residential,6,12,3559
+Noise - Residential,6,13,3834
+Noise - Residential,6,14,4168
+Noise - Residential,6,15,4586
+Noise - Residential,6,16,5064
+Noise - Residential,6,17,5632
+Noise - Residential,6,18,6598
+Noise - Residential,6,19,8073
+Noise - Residential,6,2,6135
+Noise - Residential,6,20,10107
+Noise - Residential,6,21,13681
+Noise - Residential,6,22,21434
+Noise - Residential,6,23,22554
+Noise - Residential,6,3,4429
+Noise - Residential,6,4,3455
+Noise - Residential,6,5,2655
+Noise - Residential,6,6,2304
+Noise - Residential,6,7,2300
+Noise - Residential,6,8,2806
+Noise - Residential,6,9,3164
+Rodent,0,0,200
+Rodent,0,1,134
+Rodent,0,10,434
+Rodent,0,11,457
+Rodent,0,12,392
+Rodent,0,13,406
+Rodent,0,14,428
+Rodent,0,15,410
+Rodent,0,16,412
+Rodent,0,17,443
+Rodent,0,18,439
+Rodent,0,19,514
+Rodent,0,2,102
+Rodent,0,20,459
+Rodent,0,21,490
+Rodent,0,22,486
+Rodent,0,23,332
+Rodent,0,3,86
+Rodent,0,4,54
+Rodent,0,5,74
+Rodent,0,6,107
+Rodent,0,7,222
+Rodent,0,8,286
+Rodent,0,9,356
+Rodent,1,0,245
+Rodent,1,1,148
+Rodent,1,10,898
+Rodent,1,11,852
+Rodent,1,12,817
+Rodent,1,13,746
+Rodent,1,14,738
+Rodent,1,15,666
+Rodent,1,16,733
+Rodent,1,17,595
+Rodent,1,18,624
+Rodent,1,19,591
+Rodent,1,2,100
+Rodent,1,20,586
+Rodent,1,21,654
+Rodent,1,22,466
+Rodent,1,23,402
+Rodent,1,3,62
+Rodent,1,4,88
+Rodent,1,5,102
+Rodent,1,6,221
+Rodent,1,7,443
+Rodent,1,8,639
+Rodent,1,9,810
+Rodent,2,0,247
+Rodent,2,1,143
+Rodent,2,10,852
+Rodent,2,11,805
+Rodent,2,12,731
+Rodent,2,13,667
+Rodent,2,14,715
+Rodent,2,15,674
+Rodent,2,16,640
+Rodent,2,17,585
+Rodent,2,18,553
+Rodent,2,19,520
+Rodent,2,2,107
+Rodent,2,20,522
+Rodent,2,21,553
+Rodent,2,22,538
+Rodent,2,23,371
+Rodent,2,3,75
+Rodent,2,4,84
+Rodent,2,5,124
+Rodent,2,6,229
+Rodent,2,7,388
+Rodent,2,8,620
+Rodent,2,9,797
+Rodent,3,0,236
+Rodent,3,1,123
+Rodent,3,10,725
+Rodent,3,11,757
+Rodent,3,12,722
+Rodent,3,13,685
+Rodent,3,14,666
+Rodent,3,15,563
+Rodent,3,16,619
+Rodent,3,17,549
+Rodent,3,18,546
+Rodent,3,19,533
+Rodent,3,2,101
+Rodent,3,20,564
+Rodent,3,21,519
+Rodent,3,22,476
+Rodent,3,23,348
+Rodent,3,3,89
+Rodent,3,4,83
+Rodent,3,5,131
+Rodent,3,6,269
+Rodent,3,7,401
+Rodent,3,8,617
+Rodent,3,9,732
+Rodent,4,0,237
+Rodent,4,1,154
+Rodent,4,10,793
+Rodent,4,11,731
+Rodent,4,12,734
+Rodent,4,13,668
+Rodent,4,14,637
+Rodent,4,15,638
+Rodent,4,16,564
+Rodent,4,17,484
+Rodent,4,18,513
+Rodent,4,19,568
+Rodent,4,2,102
+Rodent,4,20,568
+Rodent,4,21,528
+Rodent,4,22,426
+Rodent,4,23,366
+Rodent,4,3,81
+Rodent,4,4,86
+Rodent,4,5,150
+Rodent,4,6,213
+Rodent,4,7,400
+Rodent,4,8,589
+Rodent,4,9,741
+Rodent,5,0,267
+Rodent,5,1,131
+Rodent,5,10,730
+Rodent,5,11,710
+Rodent,5,12,660
+Rodent,5,13,656
+Rodent,5,14,588
+Rodent,5,15,565
+Rodent,5,16,516
+Rodent,5,17,519
+Rodent,5,18,479
+Rodent,5,19,471
+Rodent,5,2,107
+Rodent,5,20,456
+Rodent,5,21,481
+Rodent,5,22,389
+Rodent,5,23,326
+Rodent,5,3,74
+Rodent,5,4,86
+Rodent,5,5,97
+Rodent,5,6,237
+Rodent,5,7,384
+Rodent,5,8,581
+Rodent,5,9,705
+Rodent,6,0,224
+Rodent,6,1,174
+Rodent,6,10,482
+Rodent,6,11,476
+Rodent,6,12,421
+Rodent,6,13,436
+Rodent,6,14,385
+Rodent,6,15,390
+Rodent,6,16,392
+Rodent,6,17,324
+Rodent,6,18,381
+Rodent,6,19,406
+Rodent,6,2,102
+Rodent,6,20,341
+Rodent,6,21,380
+Rodent,6,22,346
+Rodent,6,23,301
+Rodent,6,3,76
+Rodent,6,4,58
+Rodent,6,5,65
+Rodent,6,6,122
+Rodent,6,7,217
+Rodent,6,8,346
+Rodent,6,9,464
