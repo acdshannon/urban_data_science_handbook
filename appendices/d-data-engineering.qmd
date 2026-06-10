@@ -1,0 +1,5 @@
+# Data Engineering for Urban Analysts {#sec-appendix-engineering .unnumbered}
+
+The craft skills that keep large urban datasets pleasant: SQL and DuckDB for data bigger than memory (the taxi records of @sec-mobility are the worked example), Parquet and columnar formats, talking to APIs politely (paging, rate limits, caching), web scraping and its etiquette and ethics, and a short field guide to the sensor and IoT data streams cities increasingly publish.
+
+*Planned sections: DuckDB for urban data · Files & formats · APIs, done politely · Scraping: law, ethics, technique · Streaming & sensor data.*

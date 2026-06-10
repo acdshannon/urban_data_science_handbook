@@ -1,0 +1,45 @@
+# Seeing the City: Deep Learning & Urban Imagery {#sec-imagery}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Nairobi
+**Dataset** — a stack of open imagery, all verified June 2026: [Sentinel-2](https://dataspace.copernicus.eu/) multispectral scenes (free registration, generous quotas), [Google Open Buildings](https://sites.research.google/gr/open-buildings/) v3 footprints plus the 2.5D Temporal edition (building presence and *height*, 2016–2023; CC BY 4.0 or ODbL), [WorldPop](https://www.worldpop.org/) 100 m population grids (CC BY 4.0, no login), and [Mapillary](https://www.mapillary.com/developer) street-level imagery (free token, CC BY-SA; coverage in informal settlements is uneven — itself a finding the chapter teaches). Nairobi grows fast, much of it informally — exactly where imagery matters most, because the cadastre lags the city.
+:::
+
+For most of the world's fastest-growing cities, the best map is a photograph. This chapter teaches deep learning the way a practitioner meets it — transfer learning on imagery, not theory from scratch — and points it at Nairobi: watching the city grow in a decade of satellite passes, mapping the informal settlements that official data undercount, and estimating how many people live where the census is thinnest. The chapter ends on the methods' sharpest edge: models trained on one city's idea of a "building" quietly fail on another's.
+
+## The view from above: a remote sensing primer
+
+Sensors, bands, and resolution trade-offs; from digital numbers to reflectance; indices (NDVI, NDBI) as the pre-deep-learning baseline that still earns its keep.
+
+## Convolutional networks, briefly
+
+What convolutions learn; transfer learning as the practitioner's default; segmentation versus classification versus detection — the three jobs urban imagery needs done.
+
+## Watching Nairobi grow
+
+Land-cover classification and change detection across a decade of Sentinel-2; urban expansion mapped, quantified, and cross-checked against GHSL (@sec-city-as-data).
+
+## The informal city
+
+Building footprints from Open Buildings over Kibera and Mathare; morphology metrics distinguishing informal fabric; dasymetric population estimation with WorldPop — and validation against the ground truth that exists because residents mapped it themselves.
+
+## The view from the street
+
+Street-level imagery as a sensor: green-view indices, sidewalk audits; coverage bias as a first-class concern (who drives the camera matters).
+
+## Ground truth and its discontents
+
+Label scarcity, domain shift between cities, and accuracy metrics that hide spatial failure; why every map made by a model needs an error map beside it.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**Seeing like a state** — James Scott on legibility: the state's view from above as both instrument and ideology. Satellite ML is the newest chapter of a very old project, and Map Kibera's counter-mapping shows the view from below.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: compute NDVI change for a chosen district; compare Open Buildings counts against WorldPop in two settlement types; audit a pretrained model's errors across formal and informal fabric.*
+
+## Further reading {.unnumbered}
+
+*Planned: the Open Buildings and WorldPop papers; reviews of deep learning in remote sensing; Map Kibera and participatory mapping literature.*

@@ -1,0 +1,41 @@
+# The City as a Data System {#sec-city-as-data}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: the world's cities
+**Dataset** — [GHSL Urban Centre Database R2024A](https://human-settlement.emergency.copernicus.eu/ghs_ucdb_2024.php) (European Commission JRC): 11,422 urban centres worldwide with harmonized population, area, and built-up attributes, 1975–2030, CC BY 4.0, direct download; plus the [UN World Urbanization Prospects](https://population.un.org/wup/). *Verified June 2026.*
+:::
+
+The book opens not in one city but in all of them. Before we commit to methods, we establish what kind of object a city is — a settlement, a labor market, a legal boundary, a pattern of lights at night — and why the data now pouring out of cities makes this a scientific golden age for understanding them. The chapter's single analysis is deliberately simple and deliberately global: one table containing every urban centre on the planet, from which we draw the book's first maps and first distributions, and meet the heavy-tailed, deeply unequal, fast-urbanizing world the rest of the book explores.
+
+## Why cities, why data, why now
+
+The century of urbanization in three figures; what changed when cities began recording themselves; what urban data science is (and is not).
+
+## A brief history of counting the city
+
+From the Doomsday Book and the 19th-century sanitary surveys to administrative exhaust, sensors, and satellites — every era's data encoded that era's idea of what mattered.
+
+## What is a city, exactly?
+
+Administrative, morphological, and functional definitions; why the answer changes every statistic in this book; degree-of-urbanization as a pragmatic global standard.
+
+## The world's cities in one table
+
+First analysis: load the GHSL Urban Centre Database, map every city on Earth, and look at the distributions — sizes, densities, growth rates — that later chapters will explain.
+
+## How to read this book
+
+Anchor cities and cameo cities; the chapter furniture (theory sidebars, exercises, further reading); how the code, data snapshots, and notebooks work.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**The kind of problem a city is** — Jane Jacobs' closing argument that cities are problems of *organized complexity*, and why that makes them a natural subject for data science rather than a reluctant one.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: graded exercises on the UCDB — e.g., compare national urban hierarchies, reproduce the chapter's maps for one continent, quantify how the "largest city in the world" depends on the definition chosen.*
+
+## Further reading {.unnumbered}
+
+*Planned annotated shelf: Jacobs (1961); Batty, "The New Science of Cities"; West, "Scale"; the GHSL technical documentation.*

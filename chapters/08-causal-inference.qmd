@@ -1,0 +1,45 @@
+# Causal Inference for Urban Policy {#sec-causal}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: London
+**Dataset** — three decades of hourly air quality from the [London Air Quality Network](https://www.londonair.org.uk/Londonair/API/) (Imperial College ERG; 100+ stations, NO₂/PM since 1993; open API, no key, educational-use license), with zone boundaries and traffic context from [Transport for London open data](https://tfl.gov.uk/info-for/open-data-users/) (free key) and Defra's OGL-licensed [AURN](https://uk-air.defra.gov.uk/data/) as the fully-open companion. The treatments: the 2003 Congestion Charge and the staged ULEZ rollouts of 2019–2023. *Verified June 2026.*
+:::
+
+Cities constantly run experiments on themselves; they rarely call them that. London has spent twenty years pricing its own air — congestion charging in 2003, then the world's most ambitious low-emission zone, expanded in stages. With a dense monitoring network recording the whole time, it is the ideal anchor for the causal toolkit: the methods that separate "pollution fell after the policy" from "pollution fell because of it."
+
+## Why correlation fails in cities
+
+Confounding, selection, and reverse causation in urban data; the ladder from association to intervention; why @sec-stats's regressions cannot answer policy questions alone.
+
+## Potential outcomes and natural experiments
+
+Counterfactual thinking; the experiments cities accidentally run; finding credible control groups in a world without randomization.
+
+## Difference-in-differences
+
+The ULEZ staged expansion as treatment and control; parallel trends, event-study plots, and honest placebo checks on stations the policy never touched.
+
+## Synthetic control
+
+Building counterfactual London from a weighted combination of untreated monitors for the 2003 charge; inference when N(treated) = 1.
+
+## Borders and thresholds
+
+Regression discontinuity in space: comparing just-inside to just-outside the zone boundary; why spatial RD is powerful and treacherous (spillovers cross borders; air moves).
+
+## What evaluation cannot see
+
+Anticipation, displacement, general equilibrium; external validity — what London's answer does and does not say about Jakarta's question.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**John Snow's London** — the 1854 Broad Street pump and the "grand experiment" of competing water companies: the founding natural experiment of urban science, on these same streets, 150 years before anyone said "identification strategy."
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: run the event study for a pollutant the policy shouldn't affect; stress-test the synthetic control's donor pool; map the discontinuity at the zone boundary.*
+
+## Further reading {.unnumbered}
+
+*Planned: Angrist & Pischke, "Mostly Harmless Econometrics"; Abadie on synthetic control; published ULEZ evaluations (and their critics).*

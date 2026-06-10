@@ -1,0 +1,45 @@
+# Simulating the City: Agent-Based Models {#sec-abm}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Cape Town
+**Dataset** — Statistics South Africa **Census 2011 Small Area Layer**: population-group counts for ~5,500 small areas in Cape Town (84,907 nationally), via the [DataFirst portal](https://www.datafirst.uct.ac.za/dataportal/index.php/catalog/517) (free registration; Census 2022 small areas are not yet open, so 2011 anchors the chapter). Cape Town's geography still bears apartheid's deliberate spatial design — the hardest possible test for a model of emergent segregation. *Verified June 2026.*
+:::
+
+Some urban patterns cannot be regressed into existence; they must be *grown*. This chapter builds simulations from first principles — starting with Schelling's segregation model, the most famous thirty lines of code in social science — then confronts them with Cape Town, where segregation was not emergent but engineered. The collision is the point: agent-based models teach mechanisms, real cities teach history, and honest modeling means knowing which explanation you are looking at.
+
+## Emergence and the bottom-up city
+
+Why simulate; micro-rules and macro-patterns; what ABMs offer that statistical models cannot (and vice versa).
+
+## Schelling from scratch
+
+The segregation model in Mesa, from empty grid to tipping dynamics; mild preferences, stark outcomes; parameter sweeps and phase transitions.
+
+## Measuring real segregation
+
+Dissimilarity, isolation, and entropy indices from South African census data; Cape Town and Johannesburg measured against world cities; what the indices miss at boundaries (a @sec-spatial reprise).
+
+## When the model meets the city
+
+Calibration and validation; initializing Schelling on Cape Town's actual geography; why the fit fails informatively — planned segregation is not emergent segregation.
+
+## Contagion on networks
+
+SIR models on urban contact and commuting structures (rejoining @sec-networks and @sec-mobility); superspreading, interventions, and what COVID taught urban epidemic modeling.
+
+## The big simulators
+
+LUTI models, MATSim, digital twins: what industrial-strength urban simulation does, when to trust it, and the validation crisis it lives with.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**Micromotives, macrobehavior — and the Group Areas Act** — Schelling's insight that segregation needs no segregationists, set against Cape Town's reminder that sometimes there were segregationists, with surveyors. Models of emergence must not become alibis for design.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: add a policy lever (inclusionary zoning) to the Schelling model; compute segregation indices for your own city; fit an SIR curve to one COVID wave and critique the fit.*
+
+## Further reading {.unnumbered}
+
+*Planned: Schelling, "Micromotives and Macrobehavior"; Epstein & Axtell; the South African spatial-legacy literature (Turok, GCRO reports).*

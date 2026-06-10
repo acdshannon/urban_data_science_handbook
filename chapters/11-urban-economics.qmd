@@ -1,0 +1,41 @@
+# Urban Economics & the Value of Location {#sec-econ}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Singapore
+**Dataset** — [HDB Resale Flat Prices](https://data.gov.sg/collections/189/view) (data.gov.sg): every public-housing resale transaction since 1990 — roughly a million sales with flat type, floor area, storey, and crucially **remaining lease** — under the Singapore Open Data Licence, no login or key; geocodable via the free [OneMap API](https://www.onemap.gov.sg/apidocs/) (free registration). Eighty percent of Singaporeans live in HDB flats, so this is a near-census of a housing market. *Verified June 2026.*
+:::
+
+Why do cities exist at all, and why does a square meter cost ten times more in one place than another? Singapore — a city-state that planned its way to prosperity, where the state built the housing and the market prices it — anchors the economist's toolkit. Its resale dataset is a teaching miracle: complete, clean, thirty-five years deep, and containing a variable (lease decay on 99-year flats) that turns abstract present-value theory into a regression you can run.
+
+## Why cities exist: agglomeration
+
+Sharing, matching, learning; agglomeration economies as the force scaling laws measure from the outside (@sec-scaling); the equilibrium tug-of-war with congestion and rent.
+
+## Land and location: bid-rent
+
+Von Thünen to Alonso; estimating Singapore's price–distance gradient from the CBD; polycentricity as the gradient's empirical complication.
+
+## Hedonic regression: pricing the unpriceable
+
+The hedonic framework done properly (extending @sec-stats): floor premiums, MRT proximity, and the clean estimation of lease decay; capitalization as a general instrument for valuing public goods.
+
+## Housing policy in the data
+
+Public housing at national scale; the Ethnic Integration Policy and what transaction data reveal about engineered desegregation (a counterpoint to @sec-abm); cooling measures as natural experiments (@sec-causal returns).
+
+## The economic complexity of cities
+
+From products to industries to skills: relatedness, the industry space, and measuring what a city knows how to do.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**The isolated state, downtown** — von Thünen's 1826 rings of agriculture and Alonso's 1964 translation to the city: how a model of cabbage transport became the foundation of urban land economics.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: estimate the floor-height premium and its change over time; value an MRT station opening via before/after gradients; fit and interpret the lease-decay curve against a present-value benchmark.*
+
+## Further reading {.unnumbered}
+
+*Planned: Glaeser, "Triumph of the City"; O'Sullivan's urban economics text; Hidalgo & Hausmann on economic complexity.*

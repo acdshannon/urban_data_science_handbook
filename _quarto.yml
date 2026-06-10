@@ -1,0 +1,74 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "The Urban Data Science Handbook"
+  subtitle: "Methods, models, and the world's cities"
+  author: "A.C. Shannon-Ding"
+  repo-url: https://github.com/acdshannon/urban_data_science_handbook
+  repo-actions: [issue]
+  search: true
+  page-footer:
+    left: "The Urban Data Science Handbook"
+    right: "Built with Quarto"
+  chapters:
+    - index.qmd
+    - part: "I · Foundations"
+      chapters:
+        - chapters/01-the-city-as-a-data-system.qmd
+        - chapters/02-the-urban-data-toolkit.qmd
+    - part: "II · Pattern & Prediction"
+      chapters:
+        - chapters/03-statistical-foundations.qmd
+        - chapters/04-machine-learning.qmd
+        - chapters/05-spatial-statistics.qmd
+    - part: "III · Structure & Flow"
+      chapters:
+        - chapters/06-urban-networks.qmd
+        - chapters/07-mobility-and-transport.qmd
+    - part: "IV · Causes & Laws"
+      chapters:
+        - chapters/08-causal-inference.qmd
+        - chapters/09-scaling-and-complexity.qmd
+    - part: "V · Models & Markets"
+      chapters:
+        - chapters/10-agent-based-models.qmd
+        - chapters/11-urban-economics.qmd
+    - part: "VI · Seeing & Reading the City"
+      chapters:
+        - chapters/12-urban-imagery.qmd
+        - chapters/13-the-textual-city.qmd
+    - part: "VII · The City at Stake"
+      chapters:
+        - chapters/14-data-and-power.qmd
+        - chapters/15-climate-and-risk.qmd
+    - chapters/16-coda.qmd
+  appendices:
+    - appendices/a-setup.qmd
+    - appendices/b-data-portal-atlas.qmd
+    - appendices/c-math-refresher.qmd
+    - appendices/d-data-engineering.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+execute:
+  freeze: auto
+
+format:
+  html:
+    theme:
+      light: [cosmo, styles/theme-light.scss]
+      dark: [darkly, styles/theme-dark.scss]
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    reference-location: margin
+    code-link: true
+    code-copy: true
+    fig-cap-location: margin
+  # PDF (print edition) intentionally deferred: enable once a TeX toolchain is in CI.
+  # pdf:
+  #   documentclass: scrbook
+  #   keep-tex: true

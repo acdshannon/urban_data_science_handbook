@@ -1,0 +1,45 @@
+# Urban Networks {#sec-networks}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Tokyo
+**Dataset** — the world's densest rail system: every line and station nationwide from Japan's [MLIT National Land Numerical Information railway data (N02)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-2025.html) — keyless GeoJSON download, government open license (CC BY 4.0-compatible), with the N05 time-series edition for the network's growth since 1950 — optionally enriched with timetable feeds from [ODPT](https://developer.odpt.org/) (free registration); street networks anywhere on Earth via OpenStreetMap and OSMnx. *Verified June 2026.*
+:::
+
+Tokyo moves forty million people through a lattice of interpenetrating rail systems — the perfect specimen for network science. We build the city as a graph twice: its streets (from OpenStreetMap) and its rails (from Japan's open transport data), then ask the discipline's questions. Where does the network concentrate? What communities does it imply? And the chapter's centerpiece: how many stations can Tokyo lose before it falls apart — and which five matter most?
+
+## The city as graph
+
+Nodes, edges, weights, direction; primal and dual representations of streets; what graph abstraction keeps and what it throws away.
+
+## Street networks and urban morphology
+
+OSMnx and the one-line city download; orientation entropy, block sizes, connectivity measures; a cameo gallery comparing the grids of thirty world cities.
+
+## Centrality: where the city concentrates
+
+Degree, betweenness, closeness on rails and streets; why Shinjuku keeps winning; centrality as predicted footfall (back-checked against ideas from @sec-ml).
+
+## Communities and cores
+
+Modularity and community detection on the rail network versus official wards; the polycentric city revealed by its own connectivity.
+
+## Breaking the network
+
+Percolation and targeted attack: random failures versus deliberate removals; measuring resilience; the stations whose loss costs Tokyo the most.
+
+## Multilayer and temporal networks
+
+Rail + metro + bus as coupled layers; transfers as inter-layer edges; how the network breathes across the day.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**"A city is not a tree"** — Christopher Alexander's 1965 argument that real cities are semilattices, not hierarchies, and why it reads today as a network-science manifesto written before its mathematics existed.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: compute orientation entropy for a city of your choice and place it in the chapter's gallery; find the minimum station set disconnecting two wards; compare centrality rankings across layers.*
+
+## Further reading {.unnumbered}
+
+*Planned: Barthélemy, "Spatial Networks"; Boeing's OSMnx papers; Newman's "Networks" for foundations.*

@@ -1,0 +1,41 @@
+# The Urban Data Toolkit {#sec-toolkit}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: New York City
+**Dataset** — NYC 311 Service Requests (NYC Open Data): 40+ million complaints — noise, heat, rats, potholes — with timestamps, categories, and coordinates, split across [2020–present](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9) and [2010–2019](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-2019/76ig-c548) datasets (the split itself is a teachable lesson in portal archaeology). Direct download or Socrata API; no key required, free app token recommended. *Verified June 2026.*
+:::
+
+Every skill the book assumes gets one brisk, urban-flavored tour. The anchor is the closest thing the field has to a "hello, world": New York's 311 line, the city's nervous system of complaint. By chapter's end the reader has pulled live data from an open-data API, joined it to geography, made an honest map, and packaged the whole thing reproducibly — the workflow every later chapter repeats.
+
+## The stack, quickly
+
+pandas, GeoPandas, and friends in urban context — a fast alignment tour, not a course; pointers to Appendix A for anyone who needs the slow version.
+
+## Portals and APIs: getting the data
+
+The open data portal ecosystem (Socrata, CKAN, ArcGIS Hub); pulling 311 records via API with paging, filtering, and app tokens; when to download, when to query.
+
+## Shapes of the city
+
+Vector geometry, projections and why Web Mercator lies about area, spatial joins; assigning every rat complaint to its neighborhood.
+
+## A visual grammar for urban data
+
+The book's house style: small multiples, honest choropleths and classification schemes, density over points, interactive maps when (and only when) they earn it.
+
+## Reproducibility and the snapshot discipline
+
+Environments, cached data snapshots committed alongside code, and why every analysis in this book runs top-to-bottom on a laptop.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**What does a complaint measure?** — 311 records conflate the problem with the propensity to report it; reporting behavior varies systematically by neighborhood. The first of many lessons that administrative data measures the administration as much as the city.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: pull a different complaint type and map its seasonality; compare two neighborhoods' reporting mixes; find and document one data-quality landmine in the 311 dataset (there are many).*
+
+## Further reading {.unnumbered}
+
+*Planned: O'Brien, "The Urban Commons"; the NYC Open Data documentation; Socrata/SODA API guides.*

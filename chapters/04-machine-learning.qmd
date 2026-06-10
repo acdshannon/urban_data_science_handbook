@@ -1,0 +1,45 @@
+# Machine Learning for Cities {#sec-ml}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Melbourne
+**Dataset** — [Pedestrian Counting System](https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-monthly-counts-per-hour/) (City of Melbourne open data): hourly foot-traffic counts from 60–100+ street sensors since May 2009 — one of the world's longest-running urban sensing programs, CC BY 4.0, no login (full 2009–2022 history ships as an archive ZIP on the dataset page; recent data via the live API — the join is part of the lesson). *Verified June 2026.*
+:::
+
+Machine learning enters through a dataset that is small enough to understand and rich enough to be honest about: fifteen-plus years of hourly pedestrian counts across Melbourne's center. We predict foot traffic and discover why naive cross-validation lies when data live in space and time; we cluster sensors into behavioral families (the office street, the nightlife street, the event street); and we watch the COVID lockdowns appear in the data as the most dramatic anomaly in any chapter of this book.
+
+## Prediction versus explanation
+
+Two cultures of modeling; when cities need forecasts, when they need understanding, and why confusing the two produces bad policy.
+
+## Trees, forests, and boosting
+
+From decision tree to gradient boosting on foot-traffic prediction; feature engineering with calendars, weather, and events; what feature importance does and does not mean.
+
+## Urban rhythms: time series and forecasting
+
+Seasonality at three scales (day, week, year); baselines before sophistication; forecasting with and without exogenous shocks.
+
+## Cities without labels
+
+Clustering sensor profiles into street "personalities"; PCA and UMAP as instruments for seeing structure; choosing k honestly.
+
+## The day everything changed: anomaly detection
+
+Lockdowns, protests, and sporting finals as anomalies; detection methods from robust baselines to isolation forests; the difference between an outlier and a regime change.
+
+## Honest evaluation
+
+Leakage in space and in time; blocked and rolling cross-validation; why a model that "predicts" the sensor next door has learned geography, not behavior.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**Counting people as urbanism** — William H. Whyte's Street Life Project and Jan Gehl's public-life surveys: the pedestrian count as a century-old method that sensors merely automated, and what the clipboard tradition still knows that the sensor does not.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: beat the chapter's forecasting baseline; characterize post-pandemic recovery by street type; design (on paper) a sensor placement scheme and defend its biases.*
+
+## Further reading {.unnumbered}
+
+*Planned: Breiman's "Two Cultures"; hands-on gradient boosting references; Gehl & Svarre, "How to Study Public Life".*
