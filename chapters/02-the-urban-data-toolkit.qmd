@@ -250,7 +250,7 @@ ax.set_title("Rat sightings, 2025 — raw counts")
 plt.show()
 ```
 
-A choropleth of raw counts is a population map in costume. Big, dense neighborhoods generate more of nearly everything — rats, noise, weddings — so the unnormalized map repeats the census and calls it analysis. Divide by *something* before you color a polygon. But the denominator is an argument, not a reflex: sightings per resident treats rats as a per-person experience; sightings per square kilometer treats them as a property of land. For an outdoor phenomenon reported by passers-by, area is the better-fitting denominator — and the per-capita version, with its own merits, is yours in the chapter's exercises.
+A choropleth of raw counts is a population map in costume. Big, dense neighborhoods generate more of nearly everything — rats, noise, weddings — so the unnormalized map repeats the census and calls it analysis. Divide by *something* before you color a polygon. Divide by what? That is an argument, not a reflex: sightings per resident treats rats as a per-person experience; sightings per square kilometer treats them as a property of land. For an outdoor phenomenon reported by passers-by, area is the better-fitting denominator — and the per-capita version, with its own merits, is yours in the chapter's exercises.
 
 ```{python}
 #| label: fig-rat-density
@@ -295,7 +295,7 @@ fig.suptitle("The classifier is part of the message", x=0.01, ha="left", fontsiz
 fig.tight_layout()
 ```
 
-None of the three is wrong; each answers a different question, and the sin is letting a default answer it for you. The book's habit: quantiles for ranking talk, equal intervals for magnitude talk, Fisher–Jenks when the data have genuine clusters — and the scheme named in the caption, always, so the reader can object.
+None of the three is wrong; each answers a different question, and the sin is letting a default answer it for you. My habit: quantiles for ranking talk, equal intervals for magnitude talk, Fisher–Jenks when the data have genuine clusters — and the scheme named in the caption, always, so the reader can object.
 
 **Prefer small multiples to spectacle.** The nine-panel seasons figure earlier carried eighteen thousand numbers without strain because each panel asked one question. The same data as an animation would have been more impressive and less informative — a trade this book refuses on principle. (The web edition allows itself interactivity when it adds an *operation*, like hovering for a neighborhood's name. Decoration animates; instruments respond.)
 
