@@ -1,41 +1,366 @@
 # The Urban Data Toolkit {#sec-toolkit}
 
+> *"It'll be a great place if they ever finish it."*
+> — attributed to O. Henry, on New York
+
 ::: {.callout-tip appearance="simple"}
 ## Anchor: New York City
-**Dataset** — NYC 311 Service Requests (NYC Open Data): 40+ million complaints — noise, heat, rats, potholes — with timestamps, categories, and coordinates, split across [2020–present](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9) and [2010–2019](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-2019/76ig-c548) datasets (the split itself is a teachable lesson in portal archaeology). Direct download or Socrata API; no key required, free app token recommended. *Verified June 2026.*
+**Dataset** — NYC 311 Service Requests (NYC Open Data): 40+ million complaints — noise, heat, rats, potholes — with timestamps, categories, and coordinates, split across [2020–present](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2020-to-Present/erm2-nwe9) and [2010–2019](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-2019/76ig-c548) datasets. Direct download or Socrata API; no key required. *Verified June 2026.*
 :::
 
-Every skill the book assumes gets one brisk, urban-flavored tour. The anchor is the closest thing the field has to a "hello, world": New York's 311 line, the city's nervous system of complaint. By chapter's end the reader has pulled live data from an open-data API, joined it to geography, made an honest map, and packaged the whole thing reproducibly — the workflow every later chapter repeats.
+Dial 311 in New York and a person answers, at any hour, in any of 175 languages. The number exists so that 911 can be reserved for emergencies, which means 311 receives everything else: the neighbor's subwoofer, the radiator that never warmed, the rat observed at leisure in a Brooklyn courtyard. The city logs every call — and every app report and web form — with a timestamp, a category, an agency, and, most of the time, a location. Since 2010 it has published the ledger in full. Forty million grievances, free to anyone, updated daily.
+
+This is *administrative exhaust*: data produced as a byproduct of running a city rather than for the benefit of researchers. Nobody at 311 is collecting observations for us. They are dispatching rat inspectors. That the resulting table happens to be one of the richest behavioral datasets in urban science is a happy accident — and the accident comes with terms and conditions that this chapter will teach you to read.
+
+The chapter is a toolbox, but a toolbox demonstrated on a real job, because tool demonstrations without jobs are how manuals put their readers to sleep. By the end you will have asked a live municipal API a question, received two years of the city's complaints in summary, joined them to official geography, and drawn maps honest enough to publish. Every later chapter in this book is a variation on that sequence. Amsterdam, Tokyo, São Paulo: different portals, different quirks, same craft.
 
 ## The stack, quickly
 
-pandas, GeoPandas, and friends in urban context — a fast alignment tour, not a course; pointers to Appendix A for anyone who needs the slow version.
+The book's analyses run on the scientific Python stack, and on the principle that you should know your tools well enough to distrust them in the right places.
+
+**pandas** is the workhorse: tables in, tables out, with an API that has grown by accretion since 2008 and shows it. You will sometimes find three ways to do a thing and one of them deprecated; this is the price of working in a living language, and it is worth paying. **GeoPandas** is pandas sent to geography school — every row gains a geometry, and suddenly `merge` has a spatial cousin called `sjoin`. Underneath sit **shapely** (the geometry engine) and **pyproj** (the projection engine), which you will rarely call directly and should be glad exist. **matplotlib** draws everything in this book. It is verbose, old-fashioned, and capable of great beauty, three qualities it shares with the city we are about to study. **requests** talks to the internet.
+
+The geospatial stack once had a deserved reputation for installation grief. The reputation outlived the grief by about a decade; modern wheels have retired most of it. Appendix A handles setup, and the few packages each chapter adds will be introduced when they earn their entrance.
+
+```{python}
+#| label: setup
+#| code-summary: "Chapter setup"
+from pathlib import Path
+
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import requests
+
+from book_style import set_style, PALETTE, NAVY, GOLD, TEAL
+
+set_style()
+SNAP = Path("data/snapshots/nyc_311")
+```
+
+One convention before we begin. Every dataset in this book is fetched through a small helper that checks for a local copy first:
+
+```{python}
+#| label: cached-helper
+def cached(path: Path, fetch):
+    """Read a snapshot if it exists; otherwise fetch, save, and return it."""
+    if path.exists():
+        return pd.read_csv(path)
+    df = fetch()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False)
+    return df
+```
+
+Eight lines, no cleverness. They are the difference between an analysis that works this year and an analysis that works when a reader runs it in five, after the portal has reorganized twice. We will have more to say about this in @sec-toolkit-repro; for now, simply notice that every fetch in this chapter passes through it.
 
 ## Portals and APIs: getting the data
 
-The open data portal ecosystem (Socrata, CKAN, ArcGIS Hub); pulling 311 records via API with paging, filtering, and app tokens; when to download, when to query.
+Open data portals are young. The United States launched data.gov in 2009; New York passed its Open Data Law in 2012, requiring every city agency to publish its public data on a single portal — and, pointedly, to publish it "without registration requirement, license requirement, or usage restrictions." Several hundred cities followed, atop a small oligopoly of platforms: **Socrata** (now Tyler Technologies, hosting New York and Chicago), **CKAN** (open-source, hosting Mexico City and much of Europe), and **ArcGIS Hub** (Esri's entry, common in mid-sized American cities). Learn one and the others feel familiar, the way a traveler who can navigate one airport can navigate them all.
+
+A Socrata dataset is identified by a nine-character code — `erm2-nwe9` for the 311 requests since 2020 — and answers at a predictable address. Ask politely and you receive JSON:
+
+```{python}
+#| label: first-touch
+url = "https://data.cityofnewyork.us/resource/erm2-nwe9.json"
+sample = requests.get(url, params={"$limit": 3}).json()
+pd.DataFrame(sample)[["created_date", "complaint_type", "borough", "status"]]
+```
+
+Three complaints, plucked from forty million. The `$limit` parameter belongs to **SoQL**, the portal's query language — SQL spoken with a slight accent. You can `$select`, `$where`, `$group`, and `$order`, and the entire grammar can be learned in an afternoon. An *app token* (free, instant) lifts the rate limits; at this book's volumes you will not need one, though registering is good manners if you script against a portal regularly.
+
+The beginner's instinct is to download everything and filter at home. Resist it. The full 311 table runs to tens of gigabytes, and your question — say, *how do complaints vary across the year?* — has an answer that fits in kilobytes.
+
+Never download what you can summarize at the source.
+
+```{python}
+#| label: type-totals
+def soql(dataset: str, **query):
+    """One page of a SoQL query, as a DataFrame."""
+    url = f"https://data.cityofnewyork.us/resource/{dataset}.json"
+    query.setdefault("$limit", 50_000)
+    r = requests.get(url, params=query, timeout=120)
+    r.raise_for_status()
+    return pd.DataFrame(r.json())
+
+totals = cached(
+    SNAP / "type_totals.csv",
+    lambda: soql(
+        "erm2-nwe9",
+        **{
+            "$select": "complaint_type, count(*) as n",
+            "$where": "created_date >= '2024-01-01' and created_date < '2026-01-01'",
+            "$group": "complaint_type",
+            "$order": "n DESC",
+        },
+    ),
+)
+totals["n"] = totals["n"].astype(int)
+totals.head(10)
+```
+
+<!-- TODO:data — confirm top-10 table and weave its specifics into the next paragraph -->
+
+The server did the counting; we received three hundred-odd rows where forty million lived. The ranking itself is already sociology. *Illegal parking* and *residential noise* dominate — New York's two inexhaustible resources — and the list runs down through heat complaints, blocked driveways, and rodents before reaching the long tail of the merely occasional.
+
+Categories are where the first bodies are buried. `HEAT/HOT WATER` is shouting in capitals because it migrated from a legacy system; `Noise` arrives in at least six flavors (residential, street, commercial, vehicle, park, helicopter); and the same pothole may be a `Street Condition` to one intake channel and a `Highway Condition` to another. Administrative categories encode administrative history, not analytical convenience. The first hour with any new dataset is properly spent on this kind of archaeology — counting categories, reading the data dictionary, discovering which fields are real and which are vestigial.
+
+With aggregation in hand we can ask the question that motivates the chapter's first real figure: what does a year of complaint look like?
+
+```{python}
+#| label: fetch-daily
+TYPES = [
+    "Noise - Residential", "Illegal Fireworks", "HEAT/HOT WATER",
+    "Rodent", "Christmas Tree Removal", "Illegal Parking",
+    "Snow or Ice", "Dead Tree", "Dirty Condition",
+]
+
+daily = cached(
+    SNAP / "daily_by_type.csv",
+    lambda: soql(
+        "erm2-nwe9",
+        **{
+            "$select": "date_trunc_ymd(created_date) as day, complaint_type, count(*) as n",
+            "$where": (
+                "created_date >= '2024-01-01' and created_date < '2026-01-01' and "
+                "complaint_type in ("
+                + ", ".join(f"'{t}'" for t in TYPES)
+                + ")"
+            ),
+            "$group": "day, complaint_type",
+            "$order": "day",
+        },
+    ),
+)
+daily["day"] = pd.to_datetime(daily["day"])
+daily["n"] = daily["n"].astype(int)
+```
+
+```{python}
+#| label: fig-seasons
+#| fig-cap: "Two years of daily 311 complaints, nine types. Each panel is scaled to its own maximum; the shape, not the level, is the story."
+#| code-fold: true
+# TODO:data — finalize panel order and annotations after seeing real curves
+fig, axes = plt.subplots(3, 3, figsize=(9.5, 6.5), sharex=True)
+for ax, ctype in zip(axes.flat, TYPES):
+    s = (
+        daily.query("complaint_type == @ctype")
+        .set_index("day")["n"]
+        .asfreq("D", fill_value=0)
+        .rolling(7, center=True)
+        .mean()
+    )
+    ax.fill_between(s.index, s, color=NAVY, alpha=0.85, lw=0)
+    ax.set_title(ctype, fontsize=9.5, loc="left", fontweight="normal")
+    ax.set_yticks([])
+    ax.grid(False)
+fig.suptitle("The city's year, told in complaints", x=0.01, ha="left", fontsize=13, fontweight="bold")
+fig.tight_layout()
+```
+
+The city has seasons the way a body has a pulse. Heat complaints rise the day the law starts requiring landlords to supply it — "heat season," October first — and collapse in spring. Fireworks complaints are a flat line with one volcanic week around the Fourth of July. Christmas trees are reported for removal in a frenzy of January guilt and at no other time. Rats prefer summer, as do the neighbors' parties; snow complaints track storms with the fidelity of a seismograph. None of this is surprising once seen, and all of it had to be seen to be believed — which is the figure's argument: before any model, *look*.
 
 ## Shapes of the city
 
-Vector geometry, projections and why Web Mercator lies about area, spatial joins; assigning every rat complaint to its neighborhood.
+A complaint without a place is barely a complaint, and the 311 table obliges with latitude and longitude for most rows. But coordinates alone answer no urban question. *Which neighborhood is that rat in?* requires geography to compare against — and a decision about what "neighborhood" means, which in New York is a question with theological depth. We will use the city's official compromise: **Neighborhood Tabulation Areas**, 262 zones built from census blocks for the 2020 count, large enough for statistics and small enough to mean something to a resident.
+
+```{python}
+#| label: fetch-geo
+nta_path = SNAP / "nta_2020.geojson"
+if not nta_path.exists():
+    r = requests.get(
+        "https://data.cityofnewyork.us/api/geospatial/9nt8-h7nd",
+        params={"method": "export", "format": "GeoJSON"},
+        timeout=300,
+    )
+    nta_path.parent.mkdir(parents=True, exist_ok=True)
+    nta_path.write_text(r.text)
+ntas = gpd.read_file(nta_path)
+
+rats = cached(
+    SNAP / "rat_sightings.csv",
+    lambda: soql(
+        "erm2-nwe9",
+        **{
+            "$select": "unique_key, created_date, borough, latitude, longitude",
+            "$where": (
+                "created_date >= '2025-01-01' and created_date < '2026-01-01' "
+                "and complaint_type = 'Rodent' and descriptor = 'Rat Sighting' "
+                "and latitude IS NOT NULL"
+            ),
+        },
+    ),
+)
+rats = gpd.GeoDataFrame(
+    rats,
+    geometry=gpd.points_from_xy(rats.longitude.astype(float), rats.latitude.astype(float)),
+    crs="EPSG:4326",
+)
+len(rats)
+```
+
+<!-- TODO:data — state the actual 2025 rat count in prose below -->
+
+A year of rat sightings, each one a point. Before joining points to polygons, a word about the coordinate systems they live in, because this is where geographic analysis quietly goes wrong.
+
+Latitude and longitude are angles on a spheroid, not positions on a plane. Software will happily treat them as x and y — and will then compute "distances" in degrees, an honest-sounding unit that is 30% longer north–south than east–west at New York's latitude. Every serious operation wants a *projected* coordinate system: a defined flattening of some patch of the earth onto a plane, with known, chosen distortions. A projection is a treaty with the globe: you cannot preserve area, shape, distance, and direction at once, so you sign away the ones your problem can afford to lose.
+
+Web Mercator (`EPSG:3857`), the projection of every slippy web map, signs away area — catastrophically at the poles, mildly but really at 40°N. For navigation this is the right treaty; for measuring neighborhoods it is the wrong one. New York analysis belongs in the New York–Long Island State Plane system (`EPSG:2263`), a projection so local that its distortions are smaller than surveying error. That it measures in feet is a regional eccentricity the reader is invited to enjoy.
+
+```{python}
+#| label: spatial-join
+ntas = ntas.to_crs("EPSG:2263")
+rats = rats.to_crs("EPSG:2263")
+
+joined = gpd.sjoin(rats, ntas[["ntaname", "geometry"]], how="inner", predicate="within")
+by_nta = joined.groupby("ntaname").size().rename("sightings")
+ntas = ntas.merge(by_nta, on="ntaname", how="left").fillna({"sightings": 0})
+by_nta.sort_values(ascending=False).head(8)
+```
+
+<!-- TODO:data — name the actual leading neighborhoods in the prose of the next section -->
+
+The spatial join — point in polygon, forty thousand times — runs in under a second and would have been a doctoral labor in 1970. Each sighting now knows its neighborhood; each neighborhood, its count. It remains only to draw the result without lying, which is harder than it sounds.
 
 ## A visual grammar for urban data
 
-The book's house style: small multiples, honest choropleths and classification schemes, density over points, interactive maps when (and only when) they earn it.
+This book takes visualization as seriously as estimation, on the grounds that more readers will be persuaded by your maps than by your standard errors — a fact about audiences that confers an obligation on you. The grammar below is short, and every map in the book obeys it.
 
-## Reproducibility and the snapshot discipline
+**Normalize, and argue for the denominator.** Here is the rat map drawn naively, as raw counts:
 
-Environments, cached data snapshots committed alongside code, and why every analysis in this book runs top-to-bottom on a laptop.
+```{python}
+#| label: fig-rat-naive
+#| fig-cap: "Rat sightings by neighborhood, raw counts. This map mostly shows where neighborhoods are large and populous — which we already knew."
+#| code-fold: true
+ax = ntas.plot(column="sightings", cmap="book_seq", legend=True, figsize=(7.5, 7))
+ax.set_axis_off()
+ax.set_title("Rat sightings, 2025 — raw counts")
+```
+
+A choropleth of raw counts is a population map in costume. Big, dense neighborhoods generate more of nearly everything — rats, noise, weddings — so the unnormalized map repeats the census and calls it analysis. Divide by *something* before you color a polygon. But the denominator is an argument, not a reflex: sightings per resident treats rats as a per-person experience; sightings per square kilometer treats them as a property of land. For an outdoor phenomenon reported by passers-by, area is the better-fitting denominator — and the per-capita version, with its own merits, is yours in @sec-toolkit-exercises.
+
+```{python}
+#| label: fig-rat-density
+#| fig-cap: "The same data, normalized by land area. Now the map says something the census did not already say."
+#| code-fold: true
+# EPSG:2263 measures in feet; convert to km² for civilized units
+ntas["km2"] = ntas.geometry.area / (3280.84**2)
+ntas["per_km2"] = ntas["sightings"] / ntas["km2"]
+
+ax = ntas.plot(column="per_km2", cmap="book_seq", legend=True, figsize=(7.5, 7))
+ax.set_axis_off()
+ax.set_title("Rat sightings per km², 2025")
+```
+
+<!-- TODO:data — annotate the standout neighborhoods; verify the geographic story in prose -->
+
+**Choose class breaks in the open.** A choropleth does not show your data; it shows your data after a classifier has had its way. The same density column, cut three ways:
+
+```{python}
+#| label: fig-classification
+#| fig-cap: "One dataset, three classifications. Equal intervals surrender the map to outliers; quantiles manufacture drama from dull differences; Fisher–Jenks looks for the data's own seams."
+#| code-fold: true
+import mapclassify
+
+schemes = ["equal_interval", "quantiles", "fisher_jenks"]
+fig, axes = plt.subplots(1, 3, figsize=(10.5, 4.6))
+for ax, scheme in zip(axes, schemes):
+    ntas.plot(column="per_km2", scheme=scheme, k=5, cmap="book_seq", ax=ax, legend=False)
+    ax.set_axis_off()
+    ax.set_title(scheme.replace("_", " "), fontsize=11)
+fig.suptitle("The classifier is part of the message", x=0.01, ha="left", fontsize=13, fontweight="bold")
+fig.tight_layout()
+```
+
+None of the three is wrong; each answers a different question, and the sin is letting a default answer it for you. The book's habit: quantiles for ranking talk, equal intervals for magnitude talk, Fisher–Jenks when the data have genuine clusters — and the scheme named in the caption, always, so the reader can object.
+
+**Prefer small multiples to spectacle.** The nine-panel seasons figure earlier carried eighteen thousand numbers without strain because each panel asked one question. The same data as an animation would have been more impressive and less informative — a trade this book refuses on principle. (The web edition allows itself interactivity when it adds an *operation*, like hovering for a neighborhood's name. Decoration animates; instruments respond.)
+
+**Label on the figure, not beside it.** Legends ask the reader's eyes to commute. When a line can carry its own name, it should — you will find the helper `book_style.note` doing this throughout.
+
+One rhythm figure closes the tour, because it introduces a display we will use in every sensor chapter: the week as a grid.
+
+```{python}
+#| label: fig-rhythms
+#| fig-cap: "When New York complains: average complaints by hour and weekday, 2024–2025. Noise lives on weekend nights; rats keep business hours."
+#| code-fold: true
+rhythms = cached(
+    SNAP / "rhythms.csv",
+    lambda: soql(
+        "erm2-nwe9",
+        **{
+            "$select": (
+                "complaint_type, date_extract_dow(created_date) as dow, "
+                "date_extract_hh(created_date) as hour, count(*) as n"
+            ),
+            "$where": (
+                "created_date >= '2024-01-01' and created_date < '2026-01-01' and "
+                "complaint_type in ('Noise - Residential', 'Rodent')"
+            ),
+            "$group": "complaint_type, dow, hour",
+        },
+    ),
+)
+rhythms[["dow", "hour", "n"]] = rhythms[["dow", "hour", "n"]].astype(int)
+
+days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+fig, axes = plt.subplots(1, 2, figsize=(10, 3.6))
+for ax, ctype in zip(axes, ["Noise - Residential", "Rodent"]):
+    grid = (
+        rhythms.query("complaint_type == @ctype")
+        .pivot_table(index="dow", columns="hour", values="n")
+        .reindex(index=range(7), columns=range(24))
+    )
+    im = ax.imshow(grid, aspect="auto", cmap="book_seq")
+    ax.set_yticks(range(7), days)
+    ax.set_xticks([0, 6, 12, 18, 23], ["12am", "6am", "noon", "6pm", "11pm"])
+    ax.set_title(ctype, fontsize=11)
+    ax.grid(False)
+fig.tight_layout()
+```
+
+<!-- TODO:data — confirm the Saturday-night noise peak and weekday-daytime rat pattern read correctly -->
+
+The complaint line is a sensor wrapped around the city's habits. Saturday at midnight the city is loud; Tuesday at ten it notices its rats, because that is when people are awake, outdoors, and near their phones. Which raises a question the chapter has been postponing.
 
 ::: {.callout-note}
-## Theory sidebar (planned)
-**What does a complaint measure?** — 311 records conflate the problem with the propensity to report it; reporting behavior varies systematically by neighborhood. The first of many lessons that administrative data measures the administration as much as the city.
+## What does a complaint measure?
+
+A 311 record is the conjunction of two events: a condition occurred, and somebody reported it. The dataset cannot tell them apart, and the somebody is not drawn at random. Boston's equivalent system, studied by Daniel O'Brien and colleagues, shows reporting propensity varying block by block with homeownership, language, and trust in government; Kontokosta and Hong find the same complaint in New York filed at different rates by demographic context — under-reporting in some immigrant neighborhoods, hair-trigger reporting in gentrifying ones. The rat map is a map of rats *and* of the propensity to report rats, in proportions that vary across the city.
+
+This does not make the data worthless; it makes the data a measure of something slightly different from its label. 311 measures the demand for government, which is neither the need for it nor the supply of it. Chapter 5 returns to this with formal tools, and Chapter 14 with sharper politics. For now, adopt the habit: for every administrative dataset, ask what behavior had to occur for a row to exist.
 :::
 
-## Exercises {.unnumbered}
+## Reproducibility and the snapshot discipline {#sec-toolkit-repro}
 
-*Planned: pull a different complaint type and map its seasonality; compare two neighborhoods' reporting mixes; find and document one data-quality landmine in the 311 dataset (there are many).*
+In December 2025, with no warning that anyone noticed, the 311 dataset split in two. The identifier `erm2-nwe9`, which had meant "2010 to present" for a decade, came to mean "2020 to present"; the first ten years moved to a new address. Every script in the world that queried the old identifier kept running — silently, on a truncated decade. No error was raised. None ever would be.
+
+This is the ordinary weather of open data. Portals migrate platforms, agencies rename categories, datasets are split, deprecated, "improved." The 2026 URL in a 2024 paper resolves to a different table or to nothing. Against this, the book practices what it preaches as the *snapshot discipline*:
+
+1. **Every fetch lands in a file** (`data/snapshots/`), and analysis code prefers the file. You saw `cached()` enforcing this all chapter.
+2. **Every snapshot carries a manifest** — source, query, date, license, row count — so its provenance survives the portal's amnesia. The repository's `data/snapshots/*/MANIFEST.md` files are the pattern.
+3. **The environment is pinned** (`requirements.txt`), because an analysis is code *and* dependencies, and the second rots faster.
+4. **Rendered results are frozen** alongside the source, so the published book reflects an execution that actually happened, not one presumed to be repeatable.
+
+The discipline costs a few minutes per dataset. It buys something close to immortality for the analysis — and, less grandly, it is why every figure in this chapter will still build the week you read this, whatever the portal has done in the meantime.
+
+A toolkit chapter is the throat-clearing of a methods book, and this one is nearly done clearing. But notice what you now hold: you can ask any of several hundred cities' portals a question in their own language, receive the answer summarized, place it on the earth in a defensible projection, color it without propaganda, and preserve the whole transaction against decay. The rest of the book is this loop with better questions.
+
+Ask the city; receive a table; treat it with suspicion; draw it so a stranger can check you.
+
+## Exercises {#sec-toolkit-exercises .unnumbered}
+
+1. **Your nine panels.** Choose nine complaint types we did not plot and reproduce the seasons figure. At least three should surprise a non–New Yorker; write a sentence per panel saying what drives the shape, and flag the panel where you are least confident the driver is real.
+2. **The other decade.** The 2010–2019 archive lives at `76ig-c548`. Pull residential-noise rhythms for 2015 and compare the Saturday-night peak with 2025's. What changed — the noise, or the reporting? Defend your answer with one further query of your choosing.
+3. **The per-capita rat.** Join NTA population (the portal's census tables, or Appendix B's pointers) and redraw the density map per thousand residents. Identify two neighborhoods whose rank moves sharply between denominators, and argue which map a Health Department exterminator should trust. There is a defensible answer and it is not "both."
+4. **The landmine hunt.** This dataset contains at least one of each: a duplicated unique key, a complaint created after it was closed, and a coordinate in the Atlantic. Find one instance of anything comparably wrong, document it as a manifest note, and state what analyses it would and would not poison.
+5. **Mercator's bill.** Compute each borough's area in EPSG:4326 (pretending degrees are meters), EPSG:3857, and EPSG:2263. Report the worst percentage error and one published map you suspect of paying it.
 
 ## Further reading {.unnumbered}
 
-*Planned: O'Brien, "The Urban Commons"; the NYC Open Data documentation; Socrata/SODA API guides.*
+- **O'Brien, *The Urban Commons* (2018).** The deepest study of what 311-style data measures, built on Boston's system; the source of this chapter's caution about reporters versus conditions.
+- **Kontokosta & Hong, "Bias in smart-city governance" (2021).** Quantifies socioeconomic gradients in 311 reporting across New York — required before you regress anything on complaint counts.
+- **Tufte, *The Visual Display of Quantitative Information* (1983).** The grammar behind this book's grammar; read it for the worked demolitions of bad graphics.
+- **The SoQL documentation** (dev.socrata.com). An afternoon here pays for itself within the week.
+- **Wilson et al., "Good enough practices in scientific computing" (2017).** The reproducibility discipline, stated for a general scientific audience.

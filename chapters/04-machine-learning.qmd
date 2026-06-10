@@ -1,45 +1,211 @@
 # Machine Learning for Cities {#sec-ml}
 
+> *"What attracts people most, it would appear, is other people."*
+> — William H. Whyte, *The Social Life of Small Urban Spaces* (1980)
+
 ::: {.callout-tip appearance="simple"}
 ## Anchor: Melbourne
-**Dataset** — [Pedestrian Counting System](https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-monthly-counts-per-hour/) (City of Melbourne open data): hourly foot-traffic counts from 60–100+ street sensors since May 2009 — one of the world's longest-running urban sensing programs, CC BY 4.0, no login (full 2009–2022 history ships as an archive ZIP on the dataset page; recent data via the live API — the join is part of the lesson). *Verified June 2026.*
+**Dataset** — [Pedestrian Counting System](https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-monthly-counts-per-hour/) (City of Melbourne open data): hourly foot-traffic counts from 60–100+ street sensors since May 2009 — one of the world's longest-running urban sensing programs, CC BY 4.0, no login (full 2009–2022 history ships as an archive ZIP on the dataset page; recent data via the live API). *Verified June 2026.*
 :::
 
-Machine learning enters through a dataset that is small enough to understand and rich enough to be honest about: fifteen-plus years of hourly pedestrian counts across Melbourne's center. We predict foot traffic and discover why naive cross-validation lies when data live in space and time; we cluster sensors into behavioral families (the office street, the nightlife street, the event street); and we watch the COVID lockdowns appear in the data as the most dramatic anomaly in any chapter of this book.
+Look up from the right street corners in central Melbourne and you can find them: small housings on poles and awnings, counting. Each sensor records how many pedestrians pass below, every hour, and has done so — at the oldest sites — since May 2009. The city publishes the ledger freely. It is a modest instrument by the standards of the sensed city, no cameras recognizing faces, no phones traced through the mall; just counts, hour upon hour, sixteen years deep.
 
-## Prediction versus explanation
+Modesty is its virtue. Within this one table live the questions machine learning was built for. *How many people will pass Town Hall at noon next Tuesday?* — prediction. *Which streets behave alike?* — structure. *Did something strange happen last night?* — anomaly. And because the record runs continuously from 2009 through a pandemic that emptied these same streets for months, the dataset carries its own stress test: the most violent regime change any urban sensor network has recorded, sitting in the middle of the training data like a fault line through bedrock.
 
-Two cultures of modeling; when cities need forecasts, when they need understanding, and why confusing the two produces bad policy.
+This chapter is the book's machine-learning survey, and it is organized around those questions in that order. The methods are general; the discipline — what to feed a model, how to score it without flattering it, when to believe it — is where city data differs from the textbook kind, and where this chapter earns its place.
 
-## Trees, forests, and boosting
+## Two cultures
 
-From decision tree to gradient boosting on foot-traffic prediction; feature engineering with calendars, weather, and events; what feature importance does and does not mean.
+In 2001 the statistician Leo Breiman, who had left Berkeley for consulting and returned converted, accused his own field of answering the wrong question. Statistics, he argued, had organized itself around *explaining* — fitting interpretable models and reading their coefficients as claims about the world — while a second culture, machine learning, optimized for *predicting*: whatever function best maps inputs to outputs, interpretation be damned. The cultures share equations and differ in loyalty. A regression can serve either; the difference is whether you grade it on its story or on its forecasts.
 
-## Urban rhythms: time series and forecasting
+Cities need both cultures, usually on the same morning. The transport agency timing tram frequencies needs foot-traffic *forecasts* and could not care less why Thursday resembles Wednesday; the council weighing a late-night trading law needs the *why*, because the law operates on causes. Confusing the two is not a technicality. A model that predicts brilliantly can mislead completely about mechanism — and a chapter of this book (@sec-causal) exists because the reverse error, mistaking explanation for licence to predict, has its own body count in policy.
 
-Seasonality at three scales (day, week, year); baselines before sophistication; forecasting with and without exogenous shocks.
+This chapter works in the predictive culture. Its standard of truth is *generalization*: performance on data the model has never seen. Everything else — the algorithms, the features, the diagnostics — is in service of that standard, and most of what goes wrong in applied machine learning goes wrong by accidentally grading a model on data it had already met. Hold that thought through @sec-ml-honest, where it becomes the chapter's sharpest lesson.
 
-## Cities without labels
+```{python}
+#| label: setup
+#| code-summary: "Chapter setup"
+from pathlib import Path
 
-Clustering sensor profiles into street "personalities"; PCA and UMAP as instruments for seeing structure; choosing k honestly.
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
-## The day everything changed: anomaly detection
+from book_style import set_style, note, PALETTE, NAVY, GOLD, TEAL, BRICK
 
-Lockdowns, protests, and sporting finals as anomalies; detection methods from robust baselines to isolation forests; the difference between an outlier and a regime change.
+set_style()
+SNAP = Path("data/snapshots/melbourne_pedestrians")
 
-## Honest evaluation
+hourly = pd.read_parquet(SNAP / "hourly.parquet")
+sensors = pd.read_csv(SNAP / "sensors.csv")
+# TODO:data — normalize columns after first inspection of real schema
+hourly.head(3)
+```
 
-Leakage in space and in time; blocked and rolling cross-validation; why a model that "predicts" the sensor next door has learned geography, not behavior.
+## The shape of foot traffic
+
+Models come later; first, the data must be allowed to speak. Sixteen years of hourly counts across the city center, summed to one daily series:
+
+```{python}
+#| label: fig-history
+#| fig-cap: "Daily pedestrian counts across central Melbourne, 2009–2026. The pandemic is not an outlier in this series; it is a canyon."
+#| code-fold: true
+# TODO:data — build citywide daily series; annotate lockdowns 1-6, White Night,
+# AFL Grand Final week, the 2021 earthquake(?) and the recovery slope
+```
+
+<!-- TODO:data — establishing-shot prose: the growth decade, the canyon, the asymmetric recovery; cite actual magnitudes (e.g., "the worst week of 2020 carried X% of 2019's traffic") -->
+
+Three rhythms organize everything this series does. The *day*: empty at 4 a.m., surging at lunch, decaying through the evening. The *week*: five tall weekdays, two differently-shaped weekend days. The *year*: a southern-hemisphere city whose January is festival summer and whose July is wet. The week-as-grid display from @sec-toolkit shows all three at once, and shows immediately that "Melbourne foot traffic" is an average over streets that disagree:
+
+```{python}
+#| label: fig-heartbeats
+#| fig-cap: "Average week at three sensors. Same city, same hours, different organs: the commuter artery, the café street, the nightlife strip."
+#| code-fold: true
+# TODO:data — pick three contrasting long-running sensors after inspection;
+# hour-by-weekday grids, shared color scale
+```
+
+<!-- TODO:data — name the three sensors and read their grids in prose -->
+
+A street's weekly grid is as close as data comes to a personality. Some streets work office hours; some wake at noon and roar at midnight; some exist almost entirely on Saturdays. The grids are the chapter's recurring object: we will predict one, cluster all of them, and watch the pandemic redraw them.
+
+## Predicting a street
+
+Forecasting is the licensing exam of the predictive culture, and we will sit it on one well-behaved patient: a high-traffic sensor with a long, mostly unbroken record. <!-- TODO:data — name the chosen sensor and its vital statistics --> The task: given everything through last week, predict every hour of next week.
+
+Two decisions precede any algorithm, and both matter more than the algorithm.
+
+**The features.** Foot traffic is overwhelmingly a function of *when*: hour, weekday, month, public holiday. To these calendar facts we add the series' own memory — the count at this hour last week, yesterday's total — because the recent past is the cheapest oracle available. We deliberately exclude weather, not because it is unimportant (rain visibly dents these counts) but because honest weather *forecasts* are what a deployed model would have, and pretending we had perfect ones would flatter every score that follows. The omission is a confession; Exercise 4 invites you to do better, honestly.
+
+**The baseline.** Before any learning, a rule of thumb: *predict the count from this hour last week.* Seasonal persistence, the forecaster's null hypothesis.
+
+```{python}
+#| label: forecast-models
+#| code-summary: "Feature build, time-ordered split, four models"
+# TODO:data — features: hour/dow/month/holiday + lag168, lag24;
+# train through end-2024, test on 2025; persistence baseline,
+# ridge regression, random forest, HistGradientBoostingRegressor;
+# MAE/RMSE table
+```
+
+<!-- TODO:data — results table + prose. Expected arc: persistence is embarrassingly strong; ridge ties or trails it; trees beat it by a real but humble margin. State actual MAEs and the % improvement. -->
+
+A model earns its keep by beating a rule of thumb, and urban rules of thumb are strong. Cities are creatures of habit; *last Tuesday* is a forecast that costs nothing and already explains most of next Tuesday. The gradient-boosted trees do beat it — they can see holidays coming, persistence cannot — but the margin is measured in percent, not magnitudes, and a practitioner who reports only their model's error, never the baseline's, is composing fiction with extra steps.
+
+```{python}
+#| label: fig-forecast
+#| fig-cap: "Two test weeks at the anchor sensor: observed counts against the boosted model and the last-week baseline. The model's advantage concentrates exactly where habit breaks — the holiday."
+#| code-fold: true
+# TODO:data — overlay plot, one ordinary week + one holiday week
+```
+
+What did the model learn? Permutation importance — scramble one feature, watch the error — gives the blunt answer:
+
+```{python}
+#| label: fig-importance
+#| fig-cap: "Permutation importance for the boosted model. The lag features dominate: mostly, the model has learned to consult last week."
+#| code-fold: true
+# TODO:data — permutation importance on the test window
+```
+
+Read importance plots the way you read a witness: for what they saw, not why it happened. *Important* here means *predictively load-bearing for this model on this street* — not causal, not transferable, not policy advice. The lag features dominating is the plot's way of agreeing with the baseline: memory is most of the signal, calendar handles the exceptions. When @sec-causal needs to know what *causes* foot traffic, none of this machinery will be admissible; that is not a flaw but a jurisdiction.
+
+## Streets without labels
+
+Prediction had a target. Now remove it. Given only each sensor's average weekly grid — 168 numbers, normalized so that busy and quiet streets can be compared by *shape* — which streets are the same kind of street?
+
+This is clustering, the most seductive and most abused tool in the unsupervised drawer. K-means will partition anything into k groups with perfect confidence, including white noise; the discipline lives in choosing k skeptically and naming clusters only after meeting them.
+
+```{python}
+#| label: clustering
+#| code-summary: "Normalized weekly profiles, k selection, k-means"
+# TODO:data — profiles for sensors with sufficient history; silhouette
+# across k; fit final k-means
+```
+
+```{python}
+#| label: fig-clusters
+#| fig-cap: "Street personalities: mean weekly profile per cluster, every member sensor in light gray behind. The names are ours, not the algorithm's."
+#| code-fold: true
+# TODO:data — small-multiple cluster profiles; tentative names like
+# 'commuter artery', 'retail spine', 'nightlife strip', 'weekend destination'
+```
+
+<!-- TODO:data — prose tour of the clusters with named example streets; note silhouette verdict honestly (likely modest); the point that the city's functional zones emerge from rhythm alone, no land-use map consulted -->
+
+Note what was *not* used: no land-use map, no zoning table, no knowledge of where the bars are. The clusters recover the city's functional anatomy from rhythm alone — and where a sensor lands in a surprising cluster, that is not an error to be smoothed away but the analysis's first interesting sentence. Unsupervised learning generates hypotheses, not findings. The findings come when a surprise survives a second dataset.
+
+## The day the streets stopped
+
+On a Friday in March 2020, the State of Victoria declared a state of emergency, and over the following weeks the sensors recorded something no urban instrument had seen at this resolution: a great city's foot traffic falling toward zero and staying there. Melbourne would eventually endure six lockdowns — among the longest cumulative confinements of any city on earth — and every one of them is written in this table, hour by hour.
+
+For the anomaly detector, this is the rare luxury of labeled catastrophe. The method is deliberately plain: model each sensor's *expected* hour from its own trailing weeks, score each observed hour by its distance from expectation in robust units, and average across the network into a single daily index of strangeness.
+
+```{python}
+#| label: anomaly
+#| code-summary: "Trailing-baseline expectation and robust anomaly index"
+# TODO:data — rolling median-by-(dow,hour) baseline, MAD-scaled residuals,
+# citywide daily index
+```
+
+```{python}
+#| label: fig-anomaly
+#| fig-cap: "A daily index of strangeness, 2019–2022, lockdowns shaded. The detector, built from nothing but trailing medians, finds every lockdown boundary — and a few stranger things besides."
+#| code-fold: true
+# TODO:data — index timeline with lockdown shading and labeled spikes
+```
+
+<!-- TODO:data — table or prose of top-10 anomalous days; expected mix: lockdown starts/ends, New Year's Eve, AFL Grand Final, White Night, possibly a storm; tell the best non-obvious one -->
+
+Two species of strangeness appear, and the distinction matters more than the detection. An *outlier* is a day that breaks the pattern and releases it — the Grand Final empties the streets it does not border, and Monday returns as if nothing happened. A *regime change* is a day after which the old expectation is simply wrong; March 2020 is the type specimen. Detectors built on trailing baselines will flag a regime change loudly for a few weeks and then, having absorbed the new normal into the baseline, fall silent — the statistical equivalent of growing accustomed to the smell. Knowing which species you face determines whether the right response is to investigate a day or to retire a model.
+
+The pandemic also quietly sabotaged the previous section, and it is worth saying so. Any forecasting model trained across 2020–21 has eaten two years that contradict the other fourteen; any clustering of *average* profiles has averaged a street's before and after. The chapter's analyses dodged this — windows chosen after the recovery, profiles from settled years — but the dodge was a *choice*, made by a human who knew the history, not by the algorithm. The most consequential modeling decisions in this chapter never touched the model.
+
+## Honest evaluation {#sec-ml-honest}
+
+Everything above reported scores on held-out data. This final section is about how easy it is to hold data out and still cheat.
+
+*Leakage*: information unavailable at prediction time finding its way into training. The definition sounds avoidable by inspection. It is not, because the standard tool — random cross-validation — commits it silently on any data with structure in time or space. Shuffle hourly observations into random folds and the model trains on Tuesday 3 p.m. while "predicting" Tuesday 2 p.m. of the same afternoon; autocorrelation hands it the answers through the wall. The cure is to split the way deployment splits: *forward in time*, train on the past, score on the future.
+
+```{python}
+#| label: fig-leakage
+#| fig-cap: "The same model, two evaluation designs. Random folds reward the model for memorizing the neighborhood of each hour; forward-chaining tells the truth about forecasting."
+#| code-fold: true
+# TODO:data — shuffled K-fold vs TimeSeriesSplit on identical model/features;
+# paired bar or dot plot of MAE
+```
+
+<!-- TODO:data — state the actual optimism gap, e.g. "random folds flatter the model by X%" -->
+
+Space leaks exactly as time does. Add a feature like *the count at the nearest other sensor, same hour* and watch the scores soar — the model has discovered that adjacent streets are simultaneously busy, which is geography, not foresight, and unavailable when forecasting next week. The general rule survives every special case: **evaluation must rehearse deployment.** Decide what the model will genuinely know at the moment of use, and permit it nothing else at the moment of judgment. When @sec-spatial formalizes spatial dependence, and when @sec-causal builds entire research designs out of what-was-knowable-when, this rule will already be an old friend.
+
+Leakage is the field's polite word for grading yourself with the answer key in hand. The grade always comes out well, and means nothing.
 
 ::: {.callout-note}
-## Theory sidebar (planned)
-**Counting people as urbanism** — William H. Whyte's Street Life Project and Jan Gehl's public-life surveys: the pedestrian count as a century-old method that sensors merely automated, and what the clipboard tradition still knows that the sensor does not.
+## The clipboard before the sensor
+
+Melbourne did not start counting pedestrians because sensors became cheap. It started because in 1994 the Danish architect Jan Gehl — heir to William Whyte's New York street-corner filmography of the 1970s — was hired to survey public life in a city center then so deserted after hours that locals called it "the doughnut": busy rim, empty middle. Gehl's teams counted by hand, clipboard and tally, the methods of his decades of Copenhagen studies. The 1994 numbers shamed the city; the follow-up in 2004 measured a renaissance — café seats tripled, evening foot traffic up by half — and made Melbourne the global poster child for measured, deliberate public-life repair. The sensor network, switched on in 2009, is that clipboard tradition automated and made permanent.
+
+The lineage is worth remembering when the machine learning gets absorbing. Whyte filmed plazas to learn *why* people stay — the sittable ledge, the sun, the other people. Gehl counted to convict a city of neglecting its public rooms and then to certify the repair. The sensors count magnificently and explain nothing; the explaining is still done the old way, by someone standing in the street, watching. The dataset is the heir of a humanism, and it has not outgrown its parents.
 :::
+
+A counting machine bolted above a shopping street is an unglamorous instrument, and sixteen years of its output have now carried a chapter. That is the general lesson, and it compounds: the patient sensor beats the clever snapshot, in cities as in astronomy. Melbourne decided in 2009 that attention to its streets was worth automating, and every analysis in this chapter — the forecasts, the street personalities, the canyon and the climb back out — was interest paid on that decision.
+
+The next chapter keeps the habit of suspicion and adds a dimension we have been treating as a nuisance. The sensors disagreed with each other *in space*; streets resembled their neighbors; geography kept trying to leak into the models. In @sec-spatial, space stops being a leak and becomes the subject.
 
 ## Exercises {.unnumbered}
 
-*Planned: beat the chapter's forecasting baseline; characterize post-pandemic recovery by street type; design (on paper) a sensor placement scheme and defend its biases.*
+1. **Beat the chapter.** Using any model and any honestly-available features, improve on the boosted model's test MAE at the anchor sensor — same forward-in-time split, no peeking. Report your error, your baseline's, and the hour-of-week where your model fails worst, with a hypothesis for why.
+2. **The uneven recovery.** Compute each cluster's 2025 traffic as a share of its 2019 level. Which street personalities recovered and which did not? Write the one-paragraph memo a city economist would actually want, including the number you trust least.
+3. **The strange day.** Find the most anomalous non-pandemic day in the record and identify the real-world event behind it. Newspapers are admissible evidence. If you find a day you *cannot* explain, you have found something better; document it.
+4. **Weather, honestly.** Add rainfall and temperature from the Bureau of Meteorology — as a deployed forecaster would have them, which is to say as *forecasts*, or failing that, lagged observations only. Report the improvement and whether it survives the honesty constraint.
+5. **The next sensor.** The city can afford five more sensors. Propose locations, the question each would answer, and — the part that separates analysts from vendors — the bias your placement scheme builds into every future citywide statistic.
 
 ## Further reading {.unnumbered}
 
-*Planned: Breiman's "Two Cultures"; hands-on gradient boosting references; Gehl & Svarre, "How to Study Public Life".*
+- **Breiman, "Statistical Modeling: The Two Cultures" (2001).** The polemic this chapter's framing borrows; read it with the published discussions, where the other culture answers back.
+- **Shmueli, "To Explain or to Predict?" (2010).** The cooler-headed companion piece; the clearest statement of why the goals demand different practices.
+- **Hyndman & Athanasopoulos, *Forecasting: Principles and Practice* (3rd ed., free online).** The forecasting craft in full, including the baselines this chapter weaponized.
+- **Gehl & Svarre, *How to Study Public Life* (2013).** The clipboard tradition by its living master; pairs with Whyte's 1980 film and book.
+- **Molnar, *Interpretable Machine Learning* (free online).** What importance plots and their relatives do and do not license you to say.
