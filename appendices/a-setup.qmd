@@ -1,0 +1,5 @@
+# Setting Up {#sec-appendix-setup .unnumbered}
+
+Everything required to run the book: installing Python and the environment (`requirements.txt`), getting the geospatial stack working on each platform, registering the handful of free accounts some chapters use (Copernicus, SPTrans, ODPT), and the repository's data-snapshot system — how cached copies of every anchor dataset keep the analyses reproducible even as live portals drift.
+
+*Planned sections: Python & environments · The geospatial stack without tears · Free registrations, listed in one place · Data snapshots & the `data/` layout · Running chapters as notebooks.*

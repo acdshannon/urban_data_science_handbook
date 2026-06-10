@@ -1,0 +1,19 @@
+# Coda: Toward a Science of Cities {#sec-coda .unnumbered}
+
+No anchor city this time; the anchor is the whole shelf behind us. The coda looks back at the route — fifteen methods, fourteen cities, five continents — and forward at what the field does not yet know how to do.
+
+## The tour, in one matrix
+
+A closing reprise: the methods × cities matrix, and the deeper point it encodes — every method traveled, and every city pushed back. What transferred cleanly, what required local knowledge, and why the answer to "which method?" is always "which question?"
+
+## Open problems
+
+Digital twins that deserve the name; foundation models meeting urban data; the Global South data gap as the field's central scientific and ethical problem; climate adaptation at the speed cities actually decide; evaluation — the unglamorous frontier.
+
+## A shelf of books
+
+The annotated reading list, carried over and expanded from the first edition: the urbanists, the methodologists, and the handful of books that are both.
+
+## A closing argument
+
+Why the point of urban data science is not smarter cities but fairer, more legible, more livable ones — and why the analyst's first loyalty is to the people in the data.

@@ -1,0 +1,45 @@
+# Reading the City: Language Models & Urban Text {#sec-text}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Barcelona
+**Dataset** — citizen proposals from [Decidim](https://www.decidim.barcelona/), Barcelona's open-source participatory democracy platform: tens of thousands of resident-written proposals (Catalan and Spanish, 2016–present) from the city's participatory planning processes, with district tags, support counts, and official responses. Available via the platform's [open-data export](https://www.decidim.barcelona/open-data) (daily CSV zip, no registration) and GraphQL API; the export has no prominent license statement and has had outages, so the book ships a frozen, attributed snapshot. *Verified June 2026; fallback corpus: Inside Airbnb Barcelona's ~1M multilingual reviews.*
+:::
+
+Most of what a city knows about itself is written down, not tabulated: complaints, plans, council minutes, proposals, reviews. Barcelona built the world's most-copied digital participation platform and let the texts flow — tens of thousands of citizen proposals in two languages. This chapter brings natural language processing to urban research in its modern form: embeddings and clustering to map what the city is asking for and where, then large language models as research instruments — classification and extraction at a scale no research assistant could match, always validated against the hand-coded sample that keeps them honest.
+
+## The city in words
+
+The textual exhaust of urban government; what participatory platforms record; the corpus as a measure of voice — and of who speaks.
+
+## From bags of words to embeddings
+
+A short, honest history of NLP; multilingual sentence embeddings as the workhorse; why Catalan and Spanish living in one vector space matters for civic data.
+
+## Mapping citizen voice
+
+Clustering and topic structure over proposals; the demand map — what each district asks for; support counts, official responses, and which voices convert to policy.
+
+## Language models as research instruments
+
+LLM-assisted classification and structured extraction over the corpus; prompt-as-codebook; validation against human-coded samples, with agreement statistics — the section's non-negotiable discipline.
+
+## Synthetic citizens?
+
+Generative agents meeting @sec-abm: LLM-driven agents in urban simulations, what early results show, and why "plausible" is not "valid."
+
+## Failure modes
+
+Hallucination, multilingual bias, prompt sensitivity, and the reproducibility problem of closed models; a protocol for using LLMs in published urban research.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**Arnstein's ladder, digitized** — the 1969 ladder of citizen participation as the standing rubric for civic tech: which rungs a platform like Decidim actually reaches, and how text analysis can audit the distance between consultation and power.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: cluster proposals for one district and name the clusters; benchmark an LLM classifier against the hand-coded sample; measure linguistic differences in proposal success rates.*
+
+## Further reading {.unnumbered}
+
+*Planned: Jurafsky & Martin for foundations; the computational social science literature on LLM annotation; Decidim's own design papers.*

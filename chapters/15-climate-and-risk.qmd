@@ -1,0 +1,41 @@
+# The Climate-Stressed City {#sec-climate}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Jakarta
+**Dataset** — flood and risk data for the world's fastest-sinking megacity, verified June 2026: crowd-reported flood events from [PetaBencana](https://docs.petabencana.id/) (open API, no key, CC BY 4.0, with RW-level flood-state archives for Jakarta), official per-event flood impact tables (depth, duration, affected households by kelurahan) via Jakarta's [Satu Data](https://satudata.jakarta.go.id/) portal and national catalog mirrors, Sentinel-1 radar for flood-extent mapping of the January 2020 disaster (free via Copernicus), and WorldPop/GHSL exposure grids.
+:::
+
+Climate change arrives in cities as water, heat, and unequal exposure. Jakarta is the planet's starkest case: a delta megacity subsiding up to twenty-five centimeters a year in places, flooding repeatedly, its government so encircled by the problem that it is moving the capital. The chapter assembles the climate analyst's toolkit — hazard, exposure, vulnerability — using the methods the book has built: imagery (@sec-imagery) for flood extent, spatial statistics (@sec-spatial) for who lives in harm's way, and honest uncertainty (@sec-stats) for projections that decisions actually depend on.
+
+## Hazard, exposure, vulnerability
+
+The risk triad as an analytical framework; why "is this neighborhood at risk?" is three questions wearing one coat.
+
+## The sinking metropolis
+
+Jakarta's subsidence and flood history in data; mapping flood extent from Sentinel-1 radar; crowd-sourced flood reports as a sensor network — coverage, bias, and remarkable value.
+
+## Urban heat
+
+Land-surface temperature from free thermal imagery; the heat-island anatomy of a tropical city; greenery, built form, and heat (a cameo tour of other cities' heat inequities).
+
+## Who lives in the floodplain
+
+Exposure analysis: population grids meet hazard maps; social vulnerability layered on physical risk; the distributional arithmetic of adaptation.
+
+## Deciding under uncertainty
+
+Scenarios, return periods, and their honest communication; adaptation analytics — sea walls, retreat, relocation — and the data questions behind Indonesia's new-capital decision.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**Resilience and its discontents** — Holling's ecological resilience imported to cities: what "bouncing back" obscures about who absorbs the shock, and why critics ask: resilience of what, for whom?
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: map one flood event from Sentinel-1 and compare to crowd reports; compute population exposure under two flood scenarios; replicate the heat analysis for a city of your choice.*
+
+## Further reading {.unnumbered}
+
+*Planned: IPCC urban chapters; the Jakarta subsidence literature; climate justice and adaptation planning scholarship.*

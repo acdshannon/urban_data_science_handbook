@@ -1,0 +1,18 @@
+# Quarto build artifacts
+/_book/
+/.quarto/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Data cache (large raw downloads live outside git; snapshots go in data/snapshots/)
+data/raw/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

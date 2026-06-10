@@ -1,0 +1,54 @@
+/*-- scss:defaults --*/
+// Light counterpart to the navy edition: cream paper, same gold/teal accents.
+
+$body-bg: #fffdf7;
+$body-color: #1f2d3d;
+$headings-color: #192738;
+
+$primary: #b07d20; // gold, darkened for contrast on paper
+$secondary: #1d8a8d; // teal, darkened for contrast
+$link-color: #1d8a8d;
+$link-hover-color: #b07d20;
+
+$font-family-sans-serif: "et-book", "Palatino Linotype", Palatino, Georgia, serif;
+$font-family-monospace: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+$headings-font-family: "et-book", "Palatino Linotype", Palatino, Georgia, serif;
+
+$code-block-bg: #f4f1e8;
+$code-bg: #f4f1e8;
+
+/*-- scss:rules --*/
+@import url("https://cdn.jsdelivr.net/npm/tufte-css@1.8.0/et-book/et-book-roman-line-figures/et-book-roman-line-figures.css");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap");
+
+h1,
+h2,
+h3 {
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+h1.title {
+  border-bottom: 2px solid $primary;
+  padding-bottom: 0.3em;
+}
+
+.column-margin,
+.margin-caption,
+aside {
+  color: #5a6675;
+  font-size: 0.85em;
+}
+
+.sidebar nav[role="doc-toc"] a.active {
+  color: $primary;
+  border-left: 2px solid $primary;
+}
+
+code {
+  font-size: 0.9em;
+}
+
+.callout {
+  border-left-color: $secondary;
+}

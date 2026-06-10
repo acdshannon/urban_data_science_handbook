@@ -1,0 +1,41 @@
+# Scaling, Complexity & the Science of Cities {#sec-scaling}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: every city at once
+**Dataset** — this is the book's deliberately multi-city chapter: the [GHSL Urban Centre Database R2024A](https://human-settlement.emergency.copernicus.eu/ghs_ucdb_2024.php) (11,422 urban centres, 473 indicators, harmonized globally, CC BY 4.0) and the OECD [Cities and Functional Urban Areas dataflows](https://data-explorer.oecd.org/) (GDP, jobs, and productivity for FUAs over 250k people; free SDMX API, no key). *Verified June 2026.*
+:::
+
+Individual cities are idiosyncratic; the *system* of cities is shockingly regular. City sizes follow Zipf's law across countries and centuries. Wages, patents, and crime scale superlinearly with population; road surface and fuel use scale sublinearly — the same exponents, country after country. This chapter is the book's "laws" chapter: we establish the regularities empirically, examine the interaction-based theories proposed to explain them, and learn the craft skills (fitting power laws is a famous minefield) required to do any of this honestly.
+
+## Zipf and the size of cities
+
+Rank–size plots across a dozen national urban systems; lognormal versus power law and how to tell (or fail to tell) them apart; Gibrat's growth model as a null.
+
+## Urban scaling
+
+Bettencourt–West scaling on the OECD metros: GDP, patents, emissions against population; superlinear and sublinear regimes; the 15% rule and its boundaries.
+
+## Why scaling? Interaction and agglomeration
+
+Theories of the exponents: social networks in space, infrastructure efficiency; what scaling shares with biology and where the analogy breaks; a bridge to @sec-econ's agglomeration economics.
+
+## Fractal cities
+
+Built-up form from GHSL rasters; box-counting dimensions; growth, sprawl, and space-filling compared across continents.
+
+## Ranking cities fairly
+
+Scale-adjusted metropolitan indicators: a city's residual from the scaling law as its true performance; why per-capita league tables structurally flatter big cities.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**From mouse to metropolis** — Kleiber's law and the biology of scaling; Bettencourt and West's leap from organisms to cities, and the lively debate over whether cities really are "social reactors."
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: estimate Zipf exponents for three countries with proper likelihood methods; reproduce a scaling fit and its residual ranking; test how the urban definition (@sec-city-as-data) changes the exponent.*
+
+## Further reading {.unnumbered}
+
+*Planned: Bettencourt's "Introduction to Urban Science"; Clauset, Shalizi & Newman on power-law fitting; critiques of urban scaling (Arcaute et al.).*

@@ -1,0 +1,5 @@
+# An Atlas of Open Data Portals {#sec-appendix-atlas .unnumbered}
+
+A curated, annotated directory of the world's urban open-data infrastructure: the major city portals by continent (with notes on what each is unusually good at), the multi-city aggregators (data.gov families, EU data portal, HDX), the global layers (OpenStreetMap, GHSL, WorldPop, Sentinel/Landsat), and the platform-specific access patterns (Socrata, CKAN, ArcGIS Hub) that make a new portal feel familiar in minutes.
+
+*Planned: one table per continent — portal, city, platform, highlights, license — kept current in the repository.*

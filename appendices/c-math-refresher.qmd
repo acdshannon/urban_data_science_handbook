@@ -1,0 +1,5 @@
+# Mathematical Refresher {#sec-appendix-math .unnumbered}
+
+The minimum viable mathematics for the book, stated plainly and indexed by the chapters that need it: probability and distributions (@sec-stats), linear algebra as far as eigenvectors (@sec-ml, @sec-networks), a working grip on logarithms and power laws (@sec-scaling), and the calculus of optimization in one short section. Each topic comes with the urban example it unlocks rather than abstract drill.
+
+*Planned sections: Probability essentials · Linear algebra to PageRank · Logs, exponents & power laws · Optimization in one page · Notation used throughout.*

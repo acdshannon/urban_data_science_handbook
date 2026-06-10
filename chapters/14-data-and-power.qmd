@@ -1,0 +1,45 @@
+# Data, Power & the Right to the City {#sec-power}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Chicago
+**Dataset** — the [Strategic Subject List (Historical)](https://data.cityofchicago.org/Public-Safety/Strategic-Subject-List-Historical/4aki-r3np) (Chicago Data Portal): 398,684 de-identified records from the police department's decommissioned predictive "risk score" (2012–2016), with the model's input attributes and demographics. Direct download, no registration — a real algorithm of consequence, opened for audit. (We keep a snapshot, and NYPD [Stop, Question & Frisk data](https://www.nyc.gov/site/nypd/stats/reports-analysis/stopfrisk.page) as companion material.)
+:::
+
+Every dataset in this book is an instrument of power as well as of knowledge, and this chapter stops treating that as a sidebar. Chicago ran a predictive policing program for seven years, scored almost four hundred thousand people, shut it down under scrutiny — and left the scores public. We audit them: who got scored, what drove the scores, what "fair" could even mean here, with the formal impossibility results that make fairness a choice among definitions rather than a checkbox. Around that anchor, the chapter assembles the citizen's-eye view of urban data: counting, surveillance, governance, and the open-data movement's own politics.
+
+## Who gets counted
+
+Undercounts and missing populations; administrative visibility as a resource and a risk; differential privacy at the 2020 U.S. Census and what noise-for-privacy does to small-area urban analysis.
+
+## Anatomy of a predictive policing system
+
+How the Strategic Subject List worked, what it claimed, how it was used at the door; the program's documented outcomes and its decommissioning.
+
+## Auditing the algorithm
+
+Score distributions by race and age; calibration versus error-rate parity and the impossibility theorems; feedback loops — what the RAND and Upturn evaluations found, reproduced in code.
+
+## Surveillance and re-identification
+
+The taxi-medallion de-anonymization (a @sec-mobility callback); location traces and how few points identify a person; privacy techniques and their honest limits.
+
+## Governing urban algorithms
+
+Algorithm registers (Amsterdam, Helsinki) as cameo; procurement, contestability, and community oversight (the CCOPS wave); what technical audit can and cannot deliver without institutional teeth.
+
+## The politics of open data
+
+What portals publish and what they omit; open data as transparency, as PR, and as infrastructure; data justice and counter-data initiatives from the communities being counted.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**The right to the city** — Lefebvre's claim that inhabitants hold a right to shape urban space, read against the dashboard: who holds the right to the city's data, and who is merely its subject?
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: reproduce the score-distribution audit by demographic group; demonstrate the calibration/error-rate trade-off on SSL data; write a one-page algorithmic impact memo for a fictional city deployment.*
+
+## Further reading {.unnumbered}
+
+*Planned: Barocas, Hardt & Narayanan, "Fairness and Machine Learning"; the RAND SSL evaluation; Eubanks, "Automating Inequality"; D'Ignazio & Klein, "Data Feminism".*

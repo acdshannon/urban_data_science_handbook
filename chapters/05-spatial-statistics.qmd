@@ -1,0 +1,41 @@
+# Spatial Statistics {#sec-spatial}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Mexico City
+**Dataset** — [Carpetas de investigación](https://datos.cdmx.gob.mx/dataset/carpetas-de-investigacion-fgj-de-la-ciudad-de-mexico) (FGJ / Mexico City open data portal): every criminal investigation opened by the city prosecutor since 2016 — on the order of two million point-located records, updated monthly — joined with CONAPO's [urban marginalization index](https://www.gob.mx/conapo/documentos/indices-de-marginacion-2020-284372) at census-block-group (AGEB) level. Direct downloads, open licenses. *Verified June 2026.*
+:::
+
+Space is not a nuisance to control for; in cities it is the signal. Mexico City's investigation-level crime data — one of Latin America's richest open datasets — anchors the spatial statistician's core toolkit: spatial weights, autocorrelation, point patterns, hot spots, and finally regression that takes geography seriously, relating crime to the marginalization index that maps the city's profound north–south inequality. Throughout, an insistent companion theme: crime *data* are records of state attention, not a census of crime.
+
+## Tobler's law and spatial weights
+
+Near things are more related; encoding "near" (contiguity, distance, k-nearest); the weights matrix as the load-bearing choice of every spatial analysis.
+
+## Global and local autocorrelation
+
+Moran's I and its scatterplot; LISA maps and hot/cold spots (Getis–Ord); distinguishing clusters from clustering.
+
+## Point patterns
+
+Kernel density done honestly; Ripley's K and friends; testing whether robberies cluster beyond the clustering of everything (population, roads, opportunity).
+
+## Spatial regression
+
+When OLS residuals have geography; spatial lag and spatial error models; crime against marginalization, density, and land use — and how conclusions change when space enters.
+
+## The modifiable areal unit problem
+
+The same data, three zoning schemes, three different "findings"; MAUP and the ecological fallacy as permanent occupational hazards.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**From Burgess to broken windows** — the Chicago School's concentric zones and Shaw & McKay's delinquency maps as the ancestors of every LISA map; what a century of crime cartography got right and what it criminalized.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: re-run the hot-spot analysis on a different crime type and explain the differences; show how the weights choice changes Moran's I; demonstrate MAUP with two aggregation schemes of the same incidents.*
+
+## Further reading {.unnumbered}
+
+*Planned: Rey, Arribas-Bel & Wolf, "Geographic Data Science with Python"; Anselin's spatial econometrics primers; critical literature on policing data.*

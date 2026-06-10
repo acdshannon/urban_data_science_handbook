@@ -1,0 +1,61 @@
+/*-- scss:defaults --*/
+// Carried over from the first edition's Tufte-inspired identity:
+// navy ground, warm gold accents, teal highlights, ET Book serif, JetBrains Mono code.
+
+$body-bg: #192738;
+$body-color: #e8e3d9;
+$headings-color: #f3efe6;
+
+$primary: #d09937; // warm gold
+$secondary: #29a8ab; // teal
+$link-color: #29a8ab;
+$link-hover-color: #d09937;
+
+$font-family-sans-serif: "et-book", "Palatino Linotype", Palatino, Georgia, serif;
+$font-family-monospace: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+$headings-font-family: "et-book", "Palatino Linotype", Palatino, Georgia, serif;
+
+$code-block-bg: #13202e;
+$code-bg: #13202e;
+$code-color: #e8e3d9;
+
+$navbar-bg: #13202e;
+$sidebar-bg: #13202e;
+
+/*-- scss:rules --*/
+@import url("https://cdn.jsdelivr.net/npm/tufte-css@1.8.0/et-book/et-book-roman-line-figures/et-book-roman-line-figures.css");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap");
+
+h1,
+h2,
+h3 {
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+// Gold rule under chapter titles, as in the first edition
+h1.title {
+  border-bottom: 2px solid $primary;
+  padding-bottom: 0.3em;
+}
+
+// Margin notes are first-class citizens (Tufte): keep them quiet but legible
+.column-margin,
+.margin-caption,
+aside {
+  color: #b7b1a4;
+  font-size: 0.85em;
+}
+
+.sidebar nav[role="doc-toc"] a.active {
+  color: $primary;
+  border-left: 2px solid $primary;
+}
+
+code {
+  font-size: 0.9em;
+}
+
+.callout {
+  border-left-color: $secondary;
+}

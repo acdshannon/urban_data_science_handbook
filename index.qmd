@@ -1,0 +1,25 @@
+# Preface {.unnumbered}
+
+More than half of humanity lives in cities, and cities now generate data the way they have always generated noise: constantly, abundantly, and mostly without anyone asking. Taxi meters, transit gates, air quality sensors, satellite passes, 311 complaints, property transactions — the modern city is, among other things, an instrument that measures itself. This book is about learning to read those measurements: a practical, rigorous survey of the methods of urban data science, taught through real analyses of real cities on every inhabited continent.
+
+## How this book works {.unnumbered}
+
+Each chapter pairs **a body of method** with **an anchor city and an open dataset**. We learn statistics in Amsterdam, machine learning in Melbourne, networks in Tokyo, causal inference in London, segregation models in Cape Town. The anchor carries the chapter's narrative; cameo appearances by other cities show how methods travel — and the scaling chapter deliberately analyzes hundreds of cities at once. Every dataset is openly available, every analysis is reproducible, and every chapter's code runs top to bottom.
+
+Three kinds of furniture recur throughout:
+
+- **Theory sidebars** connect methods to the urban thinkers who motivated them — Jacobs, Alonso, Burgess, Batty — so the data science stays anchored in a century of urban thought.
+- **Exercises** close each chapter, extending its analysis in graded difficulty.
+- **Further reading** offers a short, annotated shelf: the classic paper, the modern treatment, the thing worth reading next.
+
+## Who this book is for {.unnumbered}
+
+Graduate students and practitioners who can already write Python and have met introductory statistics. We move quickly through fundamentals and spend the time saved on urban substance. If your Python is rusty, Appendix A and Chapter 2 will get you aligned; if you have never written code, this book will be a difficult place to start — but the prose and figures are written to reward reading even without running anything.
+
+We are unapologetic about practicality: derivations appear when they illuminate, not as ritual. We are equally unapologetic about rigor: every method comes with its assumptions, its failure modes, and at least one example of it being used badly.
+
+::: {.callout-note}
+## A book under construction
+
+This is an early scaffold of the second edition. The table of contents and chapter abstracts are in place; analyses are being written chapter by chapter. Follow along or contribute at the [GitHub repository](https://github.com/acdshannon/urban_data_science_handbook).
+:::

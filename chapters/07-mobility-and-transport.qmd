@@ -1,0 +1,41 @@
+# Human Mobility & Transportation {#sec-mobility}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: São Paulo
+**Dataset** — the [Metrô-SP Origin–Destination Survey](https://transparencia.metrosp.com.br/dataset/pesquisa-origem-e-destino) — South America's longest-running travel survey (every decade since 1967), with public microdata for both **2017** and the newly released **2023** edition (~32,000 households, published January 2025) — plus the [SPTrans GTFS feed](https://www.sptrans.com.br/desenvolvedores/) for the bus network (free registration) and IBGE census geography. *Verified June 2026.*
+:::
+
+Mobility is where urban data science meets daily life. São Paulo — 22 million people, monumental traffic, sharp spatial inequality — anchors the chapter through its remarkable origin–destination survey, a fifty-year scientific instrument few cities possess. We extract the empirical regularities of movement, fit the classic flow models, compute transit accessibility from raw GTFS, and confront the chapter's hardest finding: how unequally the same city is accessible to its own residents.
+
+## Laws of motion
+
+Commuting regularities: trip lengths, travel-time budgets, the morning pulse; how a travel survey works and what its diary data contain.
+
+## Gravity and radiation
+
+The workhorse flow models, fit to observed OD matrices; where gravity wins, where radiation wins, and what either misses about a city shaped by class.
+
+## Timetables as data: GTFS and accessibility
+
+From raw GTFS to travel-time matrices (r5py); isochrones from the periphery and the center; cumulative-opportunity measures of access to jobs.
+
+## Unequal mobility
+
+Accessibility by income, race, and zone; periphery-to-center commutes measured in hours; accessibility as a distributive question rather than an engineering one.
+
+## New sensors of movement
+
+Taxis, ride-hail, bikes, and phones (with a New York taxi cameo); big mobility data's powers and its privacy hazards — a hand-off to @sec-power.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**Marchetti's constant** — the conjecture of a universal ~1-hour daily travel-time budget, from ancient villages to megacities, and what São Paulo's survey says about its limits when commutes are imposed rather than chosen.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: fit gravity with different deterrence functions and compare; compute job accessibility for three contrasting districts; replicate the trip-length distribution from the microdata.*
+
+## Further reading {.unnumbered}
+
+*Planned: Barbosa et al.'s mobility review; Simini et al. on radiation; Pereira et al. on transport accessibility and equity (and the r5py ecosystem).*

@@ -1,0 +1,57 @@
+# Core scientific stack
+numpy
+pandas
+scipy
+statsmodels
+scikit-learn
+jupyter
+
+# Geospatial
+geopandas
+shapely
+pyproj
+rasterio
+contextily
+osmnx
+libpysal
+esda
+spreg
+pointpats
+
+# Networks & simulation
+networkx
+mesa
+
+# Mobility & transit
+gtfs-kit
+r5py
+
+# Causal inference
+linearmodels
+pysyncon
+
+# Visualization
+matplotlib
+seaborn
+plotly
+folium
+pydeck
+mapclassify
+
+# Imagery & deep learning (Part VI)
+pystac-client
+planetary-computer
+torch
+torchvision
+
+# Text & LLMs (Part VI)
+sentence-transformers
+umap-learn
+hdbscan
+anthropic
+
+# Data access & engineering
+requests
+sodapy
+duckdb
+pyarrow

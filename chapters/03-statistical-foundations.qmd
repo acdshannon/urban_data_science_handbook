@@ -1,0 +1,45 @@
+# Statistical Foundations {#sec-stats}
+
+::: {.callout-tip appearance="simple"}
+## Anchor: Amsterdam
+**Dataset** — [Inside Airbnb: Amsterdam](https://insideairbnb.com/amsterdam/) — quarterly snapshots of every listing (price, location, attributes, ~half a million reviews), CC BY 4.0, direct download (free snapshots cover the trailing year, so the book pins and mirrors one); joined with neighborhood statistics and boundaries from [CBS Wijk- en Buurtkaart](https://www.cbs.nl/nl-nl/dossier/nederland-regionaal/geografische-data) (Statistics Netherlands, CC BY 4.0). *Verified June 2026.*
+:::
+
+Statistics is taught here the way cities actually present it: skewed, heavy-tailed, spatially entangled, and politically charged. Amsterdam's short-term rental market — one of the most contested in Europe — supplies the raw material. We describe distributions that have no meaningful mean, quantify inequality, learn what uncertainty means when the data are not a sample but the whole platform, and build our first regressions: what, exactly, is a canal view worth?
+
+## Urban distributions and their heavy tails
+
+Prices, incomes, and visit counts; log scales as a way of seeing; moments and when they mislead; the lognormal-vs-power-law question that returns in @sec-scaling.
+
+## Describing neighborhoods
+
+Robust summaries, quantiles, and inequality indices (Gini, ratios); building an honest statistical portrait of 22 districts from listings and census joins.
+
+## Uncertainty, sampling, and the bootstrap
+
+What is the population when you scraped the whole platform? Sampling variation, the bootstrap as a universal tool, and uncertainty statements worth making.
+
+## Comparison and testing
+
+Do prices differ between districts, really? Hypothesis tests, effect sizes versus p-values, and the multiple-comparisons trap of testing every neighborhood against every other.
+
+## Regression I: pricing the city
+
+Hedonic regression on listing attributes; interpretation, diagnostics, and dummy variables for neighborhoods; what the residuals already whisper about space (a teaser for @sec-spatial).
+
+## Bayesian thinking: borrowing strength
+
+Small neighborhoods have noisy averages; partial pooling and shrinkage as the principled fix; a first hierarchical model for district-level rates.
+
+::: {.callout-note}
+## Theory sidebar (planned)
+**The contested platform city** — what the "Airbnb effect" literature claims about housing markets and touristification, and how Amsterdam's regulatory experiments (registration, night caps) made it a statistical battleground.
+:::
+
+## Exercises {.unnumbered}
+
+*Planned: inequality of listing revenue across hosts; test a folk claim ("prices spike near the museums") properly; shrinkage estimates for the smallest districts.*
+
+## Further reading {.unnumbered}
+
+*Planned: Gelman & Hill (partial pooling); Wachsmuth & Weisler on Airbnb and gentrification; Inside Airbnb's methodology notes.*
