@@ -1,16 +1,18 @@
 project:
   type: book
   output-dir: _book
+  execute-dir: project
 
 book:
   title: "The Urban Data Science Handbook"
   subtitle: "Methods, models, and the world's cities"
   author: "A.C. Shannon-Ding"
+  site-url: https://acdshannon.github.io/urban_data_science_handbook/
   repo-url: https://github.com/acdshannon/urban_data_science_handbook
   repo-actions: [issue]
   search: true
   page-footer:
-    left: "The Urban Data Science Handbook"
+    left: "© A.C. Shannon-Ding · text CC BY-NC-SA 4.0 · code MIT"
     right: "Built with Quarto"
   chapters:
     - index.qmd

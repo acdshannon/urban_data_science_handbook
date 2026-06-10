@@ -244,9 +244,9 @@ All 15 anchors were verified against the live web in June 2026 (three research p
 
 **Standing action items:** mirror SSL and Decidim snapshots into `data/snapshots/` as the first data-engineering task; re-verify all anchors annually.
 
-## Open questions for the author
+## Decisions log
 
-1. **Content license** for prose/figures (code is MIT via LICENSE): CC BY-NC-SA 4.0 is the common choice for a print-path open textbook — decide before publicizing.
-2. **"Take it to your city" prompts** were considered and dropped from standard furniture — happy to re-add as an occasional feature if you change your mind.
-3. **Hosting:** GitHub Pages via Actions is the obvious default for the rendered book; say the word and CI gets added.
-4. **First chapters to write:** suggest Ch. 2 (toolkit) and Ch. 4 (Melbourne) — self-contained data, fast wins, and they exercise the snapshot system everything else depends on.
+1. **Licensing (decided June 2026):** text and figures CC BY-NC-SA 4.0 (`LICENSE-CONTENT.md`); code MIT (`LICENSE`); datasets under their original licenses.
+2. **Hosting (decided June 2026):** GitHub Pages via Actions (`.github/workflows/publish.yml`), rendering from committed `_freeze/` so CI needs no Python. Enable Pages (Settings → Pages → Source: GitHub Actions) once.
+3. **"Take it to your city" prompts** were considered and dropped from standard furniture — may return as an occasional feature.
+4. **Writing order:** Chapters 2 and 4 first (in progress), then 3, 5, 6.

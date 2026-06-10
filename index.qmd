@@ -21,5 +21,9 @@ We are unapologetic about practicality: derivations appear when they illuminate,
 ::: {.callout-note}
 ## A book under construction
 
-This is an early scaffold of the second edition. The table of contents and chapter abstracts are in place; analyses are being written chapter by chapter. Follow along or contribute at the [GitHub repository](https://github.com/acdshannon/urban_data_science_handbook).
+This is an early draft of the second edition. The table of contents and chapter abstracts are in place; analyses are being written chapter by chapter. Follow along or contribute at the [GitHub repository](https://github.com/acdshannon/urban_data_science_handbook).
 :::
+
+## License {.unnumbered}
+
+The text and figures are licensed [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/): read it, share it, teach from it, adapt it with attribution — just don't sell it. All code is [MIT-licensed](https://github.com/acdshannon/urban_data_science_handbook/blob/main/LICENSE): use it anywhere, for anything. Datasets remain under their original licenses, noted where each enters the book.
