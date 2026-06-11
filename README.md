@@ -49,10 +49,14 @@ index.qmd              preface
 chapters/              one .qmd per chapter
 appendices/            setup, data-portal atlas, math refresher, data engineering
 styles/                light & dark themes (Tufte-inspired identity)
+book_style.py          shared matplotlib theme for figures
+scripts/               snapshot fetchers (rebuild data/snapshots/ from the portals)
+data/snapshots/        pinned datasets the chapters analyze, each with a manifest
+_freeze/               committed execution results; CI renders from these
 references.bib         bibliography
 TABLE_OF_CONTENTS.md   the full annotated design document
 ```
 
 ## Status
 
-Early scaffold: structure, chapter abstracts, and anchor datasets are in place and verified; analyses are being written chapter by chapter.
+Structure, chapter abstracts, and anchor datasets are in place and verified. Chapters 2 (New York) and 4 (Melbourne) are written and executed end-to-end against committed data snapshots; the remaining chapters are being written one by one.

@@ -53,7 +53,7 @@ def cached(path: Path, fetch):
     return df
 ```
 
-Eight lines, no cleverness. They are the difference between an analysis that works this year and an analysis that works when a reader runs it in five, after the portal has reorganized twice. We will have more to say about this in @sec-toolkit-repro; for now, simply notice that every fetch in this chapter passes through it.
+Eight lines, no cleverness. They are the difference between an analysis that works this year and an analysis that works when a reader runs it in five, after the portal has reorganized twice. We will have more to say about this in @sec-toolkit-repro; for now, simply notice that every fetch in this chapter passes through it — or through the same check written out longhand, where geometry demands its own file format.
 
 ## Portals and APIs: getting the data
 
@@ -64,8 +64,11 @@ A Socrata dataset is identified by a nine-character code — `erm2-nwe9` for the
 ```{python}
 #| label: first-touch
 url = "https://data.cityofnewyork.us/resource/erm2-nwe9.json"
-sample = requests.get(url, params={"$limit": 3}).json()
-pd.DataFrame(sample)[["created_date", "complaint_type", "borough", "status"]]
+sample = cached(
+    SNAP / "sample_rows.csv",
+    lambda: pd.DataFrame(requests.get(url, params={"$limit": 3}, timeout=60).json()),
+)
+sample[["created_date", "complaint_type", "borough", "status"]]
 ```
 
 Three complaints, plucked from forty million. The `$limit` parameter belongs to **SoQL**, the portal's query language — SQL spoken with a slight accent. You can `$select`, `$where`, `$group`, and `$order`, and the entire grammar can be learned in an afternoon. An *app token* (free, instant) lifts the rate limits; at this book's volumes you will not need one, though registering is good manners if you script against a portal regularly.
@@ -100,20 +103,18 @@ totals["n"] = totals["n"].astype(int)
 totals.head(10)
 ```
 
-<!-- TODO:data — confirm top-10 table and weave its specifics into the next paragraph -->
+The server did the counting; seven million complaints from two years of city life crossed the wire as 203 rows, one per category. The ranking itself is already sociology. *Illegal parking* dominates at over a million reports — half a million a year, New York's truly inexhaustible resource — with *residential noise* (843,000) and *heat* (581,000) behind it, and the list runs down through blocked driveways, street noise, and unsanitary conditions before reaching the long tail of the merely occasional. The rat, for all its press, sits at #25.
 
-The server did the counting; we received three hundred-odd rows where forty million lived. The ranking itself is already sociology. *Illegal parking* and *residential noise* dominate — New York's two inexhaustible resources — and the list runs down through heat complaints, blocked driveways, and rodents before reaching the long tail of the merely occasional.
-
-Categories are where the first bodies are buried. `HEAT/HOT WATER` is shouting in capitals because it migrated from a legacy system; `Noise` arrives in at least six flavors (residential, street, commercial, vehicle, park, helicopter); and the same pothole may be a `Street Condition` to one intake channel and a `Highway Condition` to another. Administrative categories encode administrative history, not analytical convenience. The first hour with any new dataset is properly spent on this kind of archaeology — counting categories, reading the data dictionary, discovering which fields are real and which are vestigial.
+Categories are where the first bodies are buried. `HEAT/HOT WATER` is shouting in capitals because it migrated from a legacy system; `Noise` arrives in eight flavors (residential, street, commercial, vehicle, park, helicopter, an unmodified `Noise`, and — the city being what it is — `House of Worship`); and the same pothole may be a `Street Condition` to one intake channel and a `Highway Condition` to another. Names also die and are reborn: the 2010s archive carries both `Dead Tree` and its successor `Dead/Dying Tree`, running side by side for years until the older of the two stopped, unannounced. Administrative categories encode administrative history, not analytical convenience. The first hour with any new dataset is properly spent on this kind of archaeology — counting categories, reading the data dictionary, discovering which fields are real and which are vestigial.
 
 With aggregation in hand we can ask the question that motivates the chapter's first real figure: what does a year of complaint look like?
 
 ```{python}
 #| label: fetch-daily
 TYPES = [
-    "Noise - Residential", "Illegal Fireworks", "HEAT/HOT WATER",
-    "Rodent", "Christmas Tree Removal", "Illegal Parking",
-    "Snow or Ice", "Dead Tree", "Dirty Condition",
+    "Noise - Residential", "Noise - Street/Sidewalk", "Illegal Fireworks",
+    "HEAT/HOT WATER", "Snow or Ice", "Rodent",
+    "Illegal Parking", "Damaged Tree", "Dead/Dying Tree",
 ]
 
 daily = cached(
@@ -139,9 +140,8 @@ daily["n"] = daily["n"].astype(int)
 
 ```{python}
 #| label: fig-seasons
-#| fig-cap: "Two years of daily 311 complaints, nine types. Each panel is scaled to its own maximum; the shape, not the level, is the story."
+#| fig-cap: "Two years of daily 311 complaints, nine types, 7-day means. Each panel is scaled to its own maximum; the shape, not the level, is the story. Rows: sound, weather, the street itself."
 #| code-fold: true
-# TODO:data — finalize panel order and annotations after seeing real curves
 fig, axes = plt.subplots(3, 3, figsize=(9.5, 6.5), sharex=True)
 for ax, ctype in zip(axes.flat, TYPES):
     s = (
@@ -153,13 +153,27 @@ for ax, ctype in zip(axes.flat, TYPES):
     )
     ax.fill_between(s.index, s, color=NAVY, alpha=0.85, lw=0)
     ax.set_title(ctype, fontsize=9.5, loc="left", fontweight="normal")
+    ax.set_xlim(pd.Timestamp("2024-01-01"), pd.Timestamp("2026-01-01"))
     ax.set_yticks([])
     ax.grid(False)
+
+ticks = pd.date_range("2024-01-01", "2026-01-01", freq="6MS")
+for ax in axes[-1]:
+    ax.set_xticks(ticks, [t.strftime("%b %Y") for t in ticks], fontsize=8.5)
+
+def season_mark(ax, when, label):
+    """A dated tick on one panel, in that panel's own scale."""
+    ax.axvline(pd.Timestamp(when), color=GOLD, lw=0.9, ymax=0.8)
+    ax.text(pd.Timestamp(when), 0.86, label, transform=ax.get_xaxis_transform(),
+            fontsize=8, fontstyle="italic", ha="center", color="#6b7a8f")
+
+season_mark(axes[0, 2], "2025-07-04", "July 4")
+season_mark(axes[1, 0], "2025-10-01", "heat season opens")
 fig.suptitle("The city's year, told in complaints", x=0.01, ha="left", fontsize=13, fontweight="bold")
 fig.tight_layout()
 ```
 
-The city has seasons the way a body has a pulse. Heat complaints rise the day the law starts requiring landlords to supply it — "heat season," October first — and collapse in spring. Fireworks complaints are a flat line with one volcanic week around the Fourth of July. Christmas trees are reported for removal in a frenzy of January guilt and at no other time. Rats prefer summer, as do the neighbors' parties; snow complaints track storms with the fidelity of a seismograph. None of this is surprising once seen, and all of it had to be seen to be believed — which is the figure's argument: before any model, *look*.
+The city has seasons the way a body has a pulse. Heat complaints switch on with the law — "heat season," when landlords must supply it, opens October first, and the curve flexes upward that very day — then ride the thermometer to a midwinter crest twenty-odd times the August floor. Fireworks complaints are a flat line with one volcanic week around the Fourth of July. The two noise types disagree about the calendar: street and sidewalk noise crests at the June solstice and all but vanishes in January, while residential noise — the subwoofer through the wall — runs at its highest sustained levels in the cold months, when life moves indoors, and spikes hardest on one September weekend whose cause the table alone cannot tell you. Rats prefer summer. Illegal parking, the city's base load, scarcely has a season at all. Snow complaints track storms with the fidelity of a seismograph, and the two tree types tell one story on two clocks: dead and dying trees accumulate gently through the leafy months, while damaged trees spike overnight, whenever wind visits. None of this is surprising once seen, and all of it had to be seen to be believed — which is the figure's argument: before any model, *look*.
 
 ## Shapes of the city
 
@@ -200,9 +214,7 @@ rats = gpd.GeoDataFrame(
 len(rats)
 ```
 
-<!-- TODO:data — state the actual 2025 rat count in prose below -->
-
-A year of rat sightings, each one a point. Before joining points to polygons, a word about the coordinate systems they live in, because this is where geographic analysis quietly goes wrong.
+A year of rat sightings — 19,846 of them, each one a point. Before joining points to polygons, a word about the coordinate systems they live in, because this is where geographic analysis quietly goes wrong.
 
 Latitude and longitude are angles on a spheroid, not positions on a plane. Software will happily treat them as x and y — and will then compute "distances" in degrees, an honest-sounding unit that is 30% longer north–south than east–west at New York's latitude. Every serious operation wants a *projected* coordinate system: a defined flattening of some patch of the earth onto a plane, with known, chosen distortions. A projection is a treaty with the globe: you cannot preserve area, shape, distance, and direction at once, so you sign away the ones your problem can afford to lose.
 
@@ -219,9 +231,7 @@ ntas = ntas.merge(by_nta, on="ntaname", how="left").fillna({"sightings": 0})
 by_nta.sort_values(ascending=False).head(8)
 ```
 
-<!-- TODO:data — name the actual leading neighborhoods in the prose of the next section -->
-
-The spatial join — point in polygon, forty thousand times — runs in under a second and would have been a doctoral labor in 1970. Each sighting now knows its neighborhood; each neighborhood, its count. It remains only to draw the result without lying, which is harder than it sounds.
+The spatial join — point in polygon, twenty thousand times — runs in under a second and would have been a doctoral labor in 1970. Each sighting now knows its neighborhood; each neighborhood, its count. It remains only to draw the result without lying, which is harder than it sounds.
 
 ## A visual grammar for urban data
 
@@ -231,29 +241,40 @@ This book takes visualization as seriously as estimation, on the grounds that mo
 
 ```{python}
 #| label: fig-rat-naive
-#| fig-cap: "Rat sightings by neighborhood, raw counts. This map mostly shows where neighborhoods are large and populous — which we already knew."
+#| fig-cap: "Rat sightings by neighborhood, raw counts. Every large or populous neighborhood gets a head start, so the map is part census, part rats — with no way to tell which is which."
 #| code-fold: true
-ax = ntas.plot(column="sightings", cmap="book_seq", legend=True, figsize=(7.5, 7))
+ax = ntas.plot(column="sightings", cmap="book_seq", legend=True, figsize=(7.5, 7),
+               edgecolor="#dedacc", linewidth=0.25)
 ax.set_axis_off()
 ax.set_title("Rat sightings, 2025 — raw counts")
+plt.show()
 ```
 
-A choropleth of raw counts is a population map in costume. Big, dense neighborhoods generate more of nearly everything — rats, noise, weddings — so the unnormalized map repeats the census and calls it analysis. Divide by *something* before you color a polygon. But the denominator is an argument, not a reflex: sightings per resident treats rats as a per-person experience; sightings per square kilometer treats them as a property of land. For an outdoor phenomenon reported by passers-by, area is the better-fitting denominator — and the per-capita version, with its own merits, is yours in @sec-toolkit-exercises.
+A choropleth of raw counts is a population map in costume. Big, dense neighborhoods generate more of nearly everything — rats, noise, weddings — so the unnormalized map repeats the census and calls it analysis. Divide by *something* before you color a polygon. Divide by what? That is an argument, not a reflex: sightings per resident treats rats as a per-person experience; sightings per square kilometer treats them as a property of land. For an outdoor phenomenon reported by passers-by, area is the better-fitting denominator — and the per-capita version, with its own merits, is yours in the chapter's exercises.
 
 ```{python}
 #| label: fig-rat-density
-#| fig-cap: "The same data, normalized by land area. Now the map says something the census did not already say."
+#| fig-cap: "The same data, normalized by land area, the three leading neighborhoods labeled. Now the map says something the census did not already say."
 #| code-fold: true
+from book_style import note
+
 # EPSG:2263 measures in feet; convert to km² for civilized units
 ntas["km2"] = ntas.geometry.area / (3280.84**2)
 ntas["per_km2"] = ntas["sightings"] / ntas["km2"]
 
-ax = ntas.plot(column="per_km2", cmap="book_seq", legend=True, figsize=(7.5, 7))
+ax = ntas.plot(column="per_km2", cmap="book_seq", legend=True, figsize=(7.5, 7),
+               edgecolor="#dedacc", linewidth=0.25)
+x0, y0, x1, y1 = ntas.total_bounds
+for i, (_, row) in enumerate(ntas.nlargest(3, "per_km2").iterrows()):
+    c = row.geometry.centroid
+    note(ax, f"{row.ntaname} — {row.per_km2:.0f}/km²",
+         (c.x, c.y), (x0 + 4_000, y1 - 30_000 * i - 8_000))
 ax.set_axis_off()
 ax.set_title("Rat sightings per km², 2025")
+plt.show()
 ```
 
-<!-- TODO:data — annotate the standout neighborhoods; verify the geographic story in prose -->
+The density map has a geography the raw map only hinted at. Rat country is the old, dense city: a continuous stretch of upper Manhattan — Harlem, Hamilton Heights, both Upper Sides — and the brownstone belt of Brooklyn, with the South Bronx joining in. Manhattan and Brooklyn split eighteen of the twenty densest neighborhoods between them, nine apiece. And Highbridge in the Bronx manages to top *both* maps from barely more than a square kilometer — 561 sightings, 463 per km² — a distinction no neighborhood campaigns for. The raw map buried that fact under the sheer acreage of the outer boroughs; the normalized map is the one a rodent-control budget should read.
 
 **Choose class breaks in the open.** A choropleth does not show your data; it shows your data after a classifier has had its way. The same density column, cut three ways:
 
@@ -266,14 +287,15 @@ import mapclassify
 schemes = ["equal_interval", "quantiles", "fisher_jenks"]
 fig, axes = plt.subplots(1, 3, figsize=(10.5, 4.6))
 for ax, scheme in zip(axes, schemes):
-    ntas.plot(column="per_km2", scheme=scheme, k=5, cmap="book_seq", ax=ax, legend=False)
+    ntas.plot(column="per_km2", scheme=scheme, k=5, cmap="book_seq", ax=ax,
+              legend=False, edgecolor="#dedacc", linewidth=0.2)
     ax.set_axis_off()
     ax.set_title(scheme.replace("_", " "), fontsize=11)
 fig.suptitle("The classifier is part of the message", x=0.01, ha="left", fontsize=13, fontweight="bold")
 fig.tight_layout()
 ```
 
-None of the three is wrong; each answers a different question, and the sin is letting a default answer it for you. The book's habit: quantiles for ranking talk, equal intervals for magnitude talk, Fisher–Jenks when the data have genuine clusters — and the scheme named in the caption, always, so the reader can object.
+None of the three is wrong; each answers a different question, and the sin is letting a default answer it for you. My habit: quantiles for ranking talk, equal intervals for magnitude talk, Fisher–Jenks when the data have genuine clusters — and the scheme named in the caption, always, so the reader can object.
 
 **Prefer small multiples to spectacle.** The nine-panel seasons figure earlier carried eighteen thousand numbers without strain because each panel asked one question. The same data as an animation would have been more impressive and less informative — a trade this book refuses on principle. (The web edition allows itself interactivity when it adds an *operation*, like hovering for a neighborhood's name. Decoration animates; instruments respond.)
 
@@ -320,9 +342,7 @@ for ax, ctype in zip(axes, ["Noise - Residential", "Rodent"]):
 fig.tight_layout()
 ```
 
-<!-- TODO:data — confirm the Saturday-night noise peak and weekday-daytime rat pattern read correctly -->
-
-The complaint line is a sensor wrapped around the city's habits. Saturday at midnight the city is loud; Tuesday at ten it notices its rats, because that is when people are awake, outdoors, and near their phones. Which raises a question the chapter has been postponing.
+The complaint line is a sensor wrapped around the city's habits. The loudest cell in the noise grid is Saturday at eleven at night, and the block around it — Friday and Saturday nights, spilling past Sunday's small hours — carries the whole figure. The rat grid is its negative: the weekend's parties are reported in real time, but the weekend's rats wait politely for Monday at ten in the morning, when the reporting week opens. Which raises a question the chapter has been postponing.
 
 ::: {.callout-note}
 ## What does a complaint measure?
@@ -353,7 +373,7 @@ Ask the city; receive a table; treat it with suspicion; draw it so a stranger ca
 
 1. **Your nine panels.** Choose nine complaint types we did not plot and reproduce the seasons figure. At least three should surprise a non–New Yorker; write a sentence per panel saying what drives the shape, and flag the panel where you are least confident the driver is real.
 2. **The other decade.** The 2010–2019 archive lives at `76ig-c548`. Pull residential-noise rhythms for 2015 and compare the Saturday-night peak with 2025's. What changed — the noise, or the reporting? Defend your answer with one further query of your choosing.
-3. **The per-capita rat.** Join NTA population (the portal's census tables, or Appendix B's pointers) and redraw the density map per thousand residents. Identify two neighborhoods whose rank moves sharply between denominators, and argue which map a Health Department exterminator should trust. There is a defensible answer and it is not "both."
+3. **The per-capita rat.** Join NTA population (the portal's census tables, or Appendix B's pointers) and redraw the density map per thousand residents. Mind the vintages: the portal's NTA demographics are keyed to *2010* NTA codes, and your boundaries are 2020's — the crosswalk is part of the exercise. Identify two neighborhoods whose rank moves sharply between denominators, and argue which map a Health Department exterminator should trust. There is a defensible answer and it is not "both."
 4. **The landmine hunt.** This dataset contains at least one of each: a duplicated unique key, a complaint created after it was closed, and a coordinate in the Atlantic. Find one instance of anything comparably wrong, document it as a manifest note, and state what analyses it would and would not poison.
 5. **Mercator's bill.** Compute each borough's area in EPSG:4326 (pretending degrees are meters), EPSG:3857, and EPSG:2263. Report the worst percentage error and one published map you suspect of paying it.
 

@@ -5,10 +5,10 @@
 
 ::: {.callout-tip appearance="simple"}
 ## Anchor: Melbourne
-**Dataset** — [Pedestrian Counting System](https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-monthly-counts-per-hour/) (City of Melbourne open data): hourly foot-traffic counts from 60–100+ street sensors since May 2009 — one of the world's longest-running urban sensing programs, CC BY 4.0, no login (full 2009–2022 history ships as an archive ZIP on the dataset page; recent data via the live API). *Verified June 2026.*
+**Dataset** — [Pedestrian Counting System](https://data.melbourne.vic.gov.au/explore/dataset/pedestrian-counting-system-monthly-counts-per-hour/) (City of Melbourne open data): hourly foot-traffic counts from 60–100+ street sensors since May 2009 — one of the world's longest-running urban sensing programs, CC BY 4.0, no login. The 2009–2022 history ships as an archive ZIP on the dataset page; the live table serves a rolling window of roughly the last two years. *Verified June 2026.*
 :::
 
-Look up from the right street corners in central Melbourne and you can find them: small housings on poles and awnings, counting. Each sensor records how many pedestrians pass below, every hour, and has done so — at the oldest sites — since May 2009. The city publishes the ledger freely. It is a modest instrument by the standards of the sensed city, no cameras recognizing faces, no phones traced through the mall; just counts, hour upon hour, sixteen years deep.
+Look up from the right street corners in central Melbourne and you can find them: small housings on poles and awnings, counting. Each sensor records how many pedestrians pass below, every hour, and has done so — at the oldest sites — since May 2009. The city publishes the ledger freely. It is a modest instrument by the standards of the sensed city, no cameras recognizing faces, no phones traced through the mall; just counts, hour upon hour, seventeen years deep.
 
 Modesty is its virtue. Within this one table live the questions machine learning was built for. *How many people will pass Town Hall at noon next Tuesday?* — prediction. *Which streets behave alike?* — structure. *Did something strange happen last night?* — anomaly. And because the record runs continuously from 2009 through a pandemic that emptied these same streets for months, the dataset carries its own stress test: the most violent regime change any urban sensor network has recorded, sitting in the middle of the training data like a fault line through bedrock.
 
@@ -36,80 +36,218 @@ from book_style import set_style, note, PALETTE, NAVY, GOLD, TEAL, BRICK
 set_style()
 SNAP = Path("data/snapshots/melbourne_pedestrians")
 
-hourly = pd.read_parquet(SNAP / "hourly.parquet")
+hourly = pd.read_parquet(SNAP / "hourly.parquet")  # sensor_id, ts, count
 sensors = pd.read_csv(SNAP / "sensors.csv")
-# TODO:data — normalize columns after first inspection of real schema
+names = sensors.set_index("location_id")["sensor_description"]
 hourly.head(3)
 ```
 
 ## The shape of foot traffic
 
-Models come later; first, the data must be allowed to speak. Sixteen years of hourly counts across the city center, summed to one daily series:
+Models come later; first, the data must be allowed to speak — and first of all, an accounting of what the portal actually serves, because it is less than the city has collected. The history arrives in two pieces: a frozen archive that stops in late 2022, and a live table holding a rolling window of roughly the last two years. Between them is a nineteen-month hole — hours the sensors counted and the portal, at the time of writing, simply does not publish. @sec-toolkit called this the ordinary weather of open data. Here is the weather.
+
+A second trap is quieter. The network has grown from a dozen-odd sensors to well over a hundred, so the naive citywide sum measures the council's procurement as much as the city's pulse. The figure below sidesteps both problems at once: it follows only the fourteen sensors that have run since 2009, and it scales each one to its own 2019 average, so that what you see is *change*, on a constant instrument.
 
 ```{python}
 #| label: fig-history
-#| fig-cap: "Daily pedestrian counts across central Melbourne, 2009–2026. The pandemic is not an outlier in this series; it is a canyon."
+#| fig-cap: "Daily foot traffic at the fourteen sensors running since 2009, each scaled to its own 2019 average and averaged: 7-day means in the light line, 28-day in the bold one. The pandemic is not an outlier in this series; it is a canyon. The 2023–24 gap is the portal's, not the city's."
 #| code-fold: true
-# TODO:data — build citywide daily series; annotate lockdowns 1-6, White Night,
-# AFL Grand Final week, the 2021 earthquake(?) and the recovery slope
+daily = (
+    hourly.assign(date=hourly.ts.dt.normalize())
+    .groupby(["sensor_id", "date"])["count"]
+    .agg(["sum", "size"])
+)
+daily = daily.loc[daily["size"] >= 20, "sum"].rename("total").reset_index()
+
+yr = daily.date.dt.year
+cohort = sorted(
+    set(daily.loc[yr == 2010, "sensor_id"])
+    & set(daily.loc[yr == 2019, "sensor_id"])
+    & set(daily.loc[yr == 2025, "sensor_id"])
+)
+panel = daily[daily.sensor_id.isin(cohort)].copy()
+base = panel[panel.date.dt.year == 2019].groupby("sensor_id").total.mean()
+panel["index"] = panel.total / panel.sensor_id.map(base)
+city = panel.groupby("date")["index"].mean().asfreq("D")
+smooth = city.rolling(7, center=True).mean()
+trend = city.rolling(28, center=True).mean()
+
+# Melbourne metro lockdowns, first to last full stay-at-home day
+LOCKDOWNS = [
+    ("2020-03-31", "2020-05-12"), ("2020-07-09", "2020-10-27"),
+    ("2021-02-13", "2021-02-17"), ("2021-05-28", "2021-06-10"),
+    ("2021-07-16", "2021-07-27"), ("2021-08-05", "2021-10-21"),
+]
+
+fig, ax = plt.subplots(figsize=(9.5, 4.2))
+for a, b in LOCKDOWNS:
+    ax.axvspan(pd.Timestamp(a), pd.Timestamp(b), color=BRICK, alpha=0.22, lw=0)
+ax.plot(smooth.index, smooth, color=NAVY, lw=0.6, alpha=0.35)
+ax.plot(trend.index, trend, color=NAVY, lw=1.7)
+ax.axhline(1.0, color=GOLD, lw=0.8, ls="--", alpha=0.8)
+ax.set_ylabel("traffic, 2019 = 1.0")
+ax.set_ylim(0, 1.45)
+worst = smooth["2020"].idxmin()
+note(ax, "the worst week of 2020:\n14% of 2019", (worst, smooth["2020"].min()),
+     (pd.Timestamp("2015-06-01"), 0.18))
+note(ax, "six lockdowns", (pd.Timestamp("2021-08-20"), 0.32),
+     (pd.Timestamp("2022-10-01"), 0.13))
+ax.text(pd.Timestamp("2023-08-15"), 0.33, "the portal's hole\n(Nov 2022 – Jun 2024)",
+        ha="center", fontsize=9.5, fontstyle="italic", color="#6b7a8f")
+note(ax, "the plateau: ~75% of 2019", (pd.Timestamp("2025-06-01"), 0.78),
+     (pd.Timestamp("2024-03-01"), 1.18))
+ax.set_title("Seventeen years of footsteps, fourteen patient sensors")
+plt.show()
 ```
 
-<!-- TODO:data — establishing-shot prose: the growth decade, the canyon, the asymmetric recovery; cite actual magnitudes (e.g., "the worst week of 2020 carried X% of 2019's traffic") -->
+The shape rewards a slow read. The left half is the *growth decade*: the 2009 cohort carried about a tenth more traffic in 2019 than it had in 2010, a city center filling in slowly enough that nobody threw a parade. Then the canyon: in the worst week of August 2020 — stage-four restrictions, an 8 p.m. curfew — these fourteen streets carried **14% of their 2019 traffic**. The sawtooth through 2021 is lockdowns four, five, and six arriving like aftershocks. And the right half is the part the recovery headlines get wrong: six years on, the cohort idles at about three-quarters of its 2019 self — but the average conceals the real news, which is that *weekends are back (90% and climbing) and weekdays are not (73%)*. The office did not return; Saturday did. The pandemic, it turns out, was hardest on the most habitual traffic of all.
 
 Three rhythms organize everything this series does. The *day*: empty at 4 a.m., surging at lunch, decaying through the evening. The *week*: five tall weekdays, two differently-shaped weekend days. The *year*: a southern-hemisphere city whose January is festival summer and whose July is wet. The week-as-grid display from @sec-toolkit shows all three at once, and shows immediately that "Melbourne foot traffic" is an average over streets that disagree:
 
 ```{python}
 #| label: fig-heartbeats
-#| fig-cap: "Average week at three sensors. Same city, same hours, different organs: the commuter artery, the café street, the nightlife strip."
+#| fig-cap: "Average week at three sensors, 2024–2026. Same city, same hours, different organs: the commuter artery, the café street, the nightlife strip. Each grid is scaled to its own peak; the shape, not the level, is the story."
 #| code-fold: true
-# TODO:data — pick three contrasting long-running sensors after inspection;
-# hour-by-weekday grids, shared color scale
+TRIO = [9, 67, 20]  # Southern Cross Station; Degraves St; Chinatown-Lt Bourke
+live = hourly[hourly.ts >= "2024-07-01"].assign(
+    dow=lambda d: d.ts.dt.dayofweek, hour=lambda d: d.ts.dt.hour
+)
+days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+fig, axes = plt.subplots(1, 3, figsize=(10, 3.4))
+for ax, sid in zip(axes, TRIO):
+    grid = (
+        live[live.sensor_id == sid]
+        .pivot_table(index="dow", columns="hour", values="count", aggfunc="mean")
+        .reindex(index=range(7), columns=range(24))
+    )
+    ax.imshow(grid / grid.max().max(), aspect="auto", cmap="book_seq", vmin=0, vmax=1)
+    ax.set_yticks(range(7), days, fontsize=8.5)
+    ax.set_xticks([0, 6, 12, 18, 23], ["12am", "6am", "noon", "6pm", "11pm"], fontsize=8.5)
+    ax.set_title(names[sid], fontsize=10.5)
+    ax.grid(False)
+fig.tight_layout()
 ```
 
-<!-- TODO:data — name the three sensors and read their grids in prose -->
+Read the grids left to right. **Southern Cross Station** is a tide chart of salaried Melbourne: two dark bands at 8 a.m. and 5 p.m., Monday through Friday, and a weekend so faint the sensor might as well rest — Saturday and Sunday together carry a seventh of the weekday load. **Degraves Street**, the café laneway off Flinders Lane, ignores the commute almost entirely and lives at lunch, every day of the week; its grid is a single warm stripe down the noon column. And **Chinatown's Little Bourke Street** is awake when the other two are asleep: quiet most mornings, warming through the afternoon, peaking Saturday at seven in the evening and still going at one on Sunday morning, when Southern Cross records twenty souls an hour.
 
 A street's weekly grid is as close as data comes to a personality. Some streets work office hours; some wake at noon and roar at midnight; some exist almost entirely on Saturdays. The grids are the chapter's recurring object: we will predict one, cluster all of them, and watch the pandemic redraw them.
 
 ## Predicting a street
 
-Forecasting is the licensing exam of the predictive culture, and we will sit it on one well-behaved patient: a high-traffic sensor with a long, mostly unbroken record. <!-- TODO:data — name the chosen sensor and its vital statistics --> The task: given everything through last week, predict every hour of next week.
+Forecasting is the licensing exam of the predictive culture, and we will sit it on one well-behaved patient: **Town Hall (West)**, sensor 4, bolted above Swanston Street since March 2009 and the busiest instrument in the current network — roughly 1,500 pedestrians an hour, 35,000 a day, with not a single missing day in the live window. (It also watches the very corner our opening question asked about, which is no accident.) The task: given everything through last week, predict every hour of next week. We train on the window's first nineteen months and grade on the five months of 2026 the portal had served when this chapter was executed — 3,844 held-out hours.
 
 Two decisions precede any algorithm, and both matter more than the algorithm.
 
-**The features.** Foot traffic is overwhelmingly a function of *when*: hour, weekday, month, public holiday. To these calendar facts we add the series' own memory — the count at this hour last week, yesterday's total — because the recent past is the cheapest oracle available. We deliberately exclude weather, not because it is unimportant (rain visibly dents these counts) but because honest weather *forecasts* are what a deployed model would have, and pretending we had perfect ones would flatter every score that follows. The omission is a confession; Exercise 4 invites you to do better, honestly.
+**The features.** Foot traffic is overwhelmingly a function of *when*: hour, weekday, month, public holiday. To these calendar facts we add the series' own memory — the count at this hour last week, the count two weeks back, last week's average level — because the recent past is the cheapest oracle available. Mark what the task forbids: for a forecast of next week issued on Sunday night, *yesterday* lies inside the forecast horizon for six of the seven days, so the freshest lag the model is entitled to is a week old. Weather we exclude, not because it is unimportant (rain visibly dents these counts) but because a deployed model would see weather *forecasts*, not weather, and granting ourselves perfect foreknowledge would flatter every score that follows. The omission is a confession; Exercise 4 invites you to repair it under the same rules.
 
 **The baseline.** Before any learning, a rule of thumb: *predict the count from this hour last week.* Seasonal persistence, the forecaster's null hypothesis.
 
 ```{python}
 #| label: forecast-models
 #| code-summary: "Feature build, time-ordered split, four models"
-# TODO:data — features: hour/dow/month/holiday + lag168, lag24;
-# train through end-2024, test on 2025; persistence baseline,
-# ridge regression, random forest, HistGradientBoostingRegressor;
-# MAE/RMSE table
+import holidays
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
+from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_absolute_error, root_mean_squared_error
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import OneHotEncoder
+
+ANCHOR = 4  # Town Hall (West)
+th = hourly[hourly.sensor_id == ANCHOR].set_index("ts")["count"].loc["2024-06-11":].asfreq("h")
+
+vic = holidays.country_holidays("AU", subdiv="VIC")
+X = pd.DataFrame(index=th.index)
+X["hour"], X["dow"], X["month"] = X.index.hour, X.index.dayofweek, X.index.month
+X["holiday"] = [d in vic for d in X.index.date]
+X["lag168"] = th.shift(168)                       # same hour last week
+X["lag336"] = th.shift(336)                       # same hour two weeks back
+X["lastweek_mean"] = th.shift(168).rolling(168).mean()
+y = th
+
+ok = X.notna().all(axis=1) & y.notna()
+train = ok & (X.index < "2026-01-01")
+test = ok & (X.index >= "2026-01-01")
+
+models = {
+    "ridge regression": make_pipeline(
+        ColumnTransformer(
+            [("cal", OneHotEncoder(handle_unknown="ignore"), ["hour", "dow", "month"])],
+            remainder="passthrough",
+        ),
+        Ridge(alpha=1.0),
+    ),
+    "random forest": RandomForestRegressor(
+        n_estimators=200, min_samples_leaf=2, n_jobs=-1, random_state=0
+    ),
+    "gradient boosting": HistGradientBoostingRegressor(
+        max_iter=500, learning_rate=0.06, random_state=0
+    ),
+}
+preds = {"persistence (last week)": X.loc[test, "lag168"]}
+for label, model in models.items():
+    model.fit(X[train], y[train])
+    preds[label] = pd.Series(model.predict(X[test]), index=X.index[test])
+
+obs = y[test]
+scores = pd.DataFrame(
+    {
+        k: {"MAE": mean_absolute_error(obs, p), "RMSE": root_mean_squared_error(obs, p)}
+        for k, p in preds.items()
+    }
+).T
+gain = 1 - scores["MAE"] / scores.loc["persistence (last week)", "MAE"]
+scores["vs. baseline"] = gain.map(lambda x: "—" if x == 0 else f"−{x:.0%}")
+scores.round(1)
 ```
 
-<!-- TODO:data — results table + prose. Expected arc: persistence is embarrassingly strong; ridge ties or trails it; trees beat it by a real but humble margin. State actual MAEs and the % improvement. -->
-
-A model earns its keep by beating a rule of thumb, and urban rules of thumb are strong. Cities are creatures of habit; *last Tuesday* is a forecast that costs nothing and already explains most of next Tuesday. The gradient-boosted trees do beat it — they can see holidays coming, persistence cannot — but the margin is measured in percent, not magnitudes, and a practitioner who reports only their model's error, never the baseline's, is composing fiction with extra steps.
+A model earns its keep by beating a rule of thumb, and urban rules of thumb are strong. Cities are creatures of habit; *last Tuesday* is a forecast that costs nothing and already explains most of next Tuesday. On the held-out months, persistence misses by 272 pedestrians an hour, on a street averaging 1,600 — call it 17%, free of charge. Ridge regression, fed the calendar, claws back 7% of that error; the random forest 11%; the gradient-boosted trees 12%, landing at an MAE of 239. The margin is real and it is humble — measured in percent, not magnitudes — and it is not spread evenly. On the hours where the holiday calendar breaks the weekly echo (a holiday this week, or one last week now falsely echoing), the boosted model beats persistence by 22%, double its advantage on ordinary hours. The trees can see Good Friday coming; persistence cannot, and then repeats it a week late. A practitioner who reports only their model's error, never the baseline's, is composing fiction with extra steps.
 
 ```{python}
 #| label: fig-forecast
-#| fig-cap: "Two test weeks at the anchor sensor: observed counts against the boosted model and the last-week baseline. The model's advantage concentrates exactly where habit breaks — the holiday."
+#| fig-cap: "Two test weeks at Town Hall (West): observed counts against the boosted model and the last-week baseline, public holidays shaded. The model's advantage concentrates exactly where habit breaks — the holiday."
 #| code-fold: true
-# TODO:data — overlay plot, one ordinary week + one holiday week
+gb_pred = preds["gradient boosting"]
+base_pred = preds["persistence (last week)"]
+weeks = [("2026-02-16", "An ordinary week in February"), ("2026-03-30", "Easter week")]
+fig, axes = plt.subplots(2, 1, figsize=(9.5, 5.8), sharey=True)
+for ax, (start, title) in zip(axes, weeks):
+    t0 = pd.Timestamp(start)
+    o = obs.loc[t0 : t0 + pd.Timedelta(days=7) - pd.Timedelta(hours=1)]
+    for d in pd.date_range(t0, periods=7, freq="D"):
+        if d.date() in vic:
+            ax.axvspan(d, d + pd.Timedelta(days=1), color=BRICK, alpha=0.10, lw=0)
+    ax.plot(o.index, o, color=NAVY, lw=1.6, label="observed")
+    ax.plot(o.index, gb_pred.loc[o.index], color=GOLD, lw=1.2, label="gradient boosting")
+    ax.plot(o.index, base_pred.loc[o.index], color="#9aa3ad", lw=1.0, ls="--", label="last-week baseline")
+    ticks = pd.date_range(t0, periods=7, freq="D") + pd.Timedelta(hours=12)
+    ax.set_xticks(ticks, [d.strftime("%a %d %b") for d in ticks], fontsize=9)
+    ax.set_xlim(o.index[0], o.index[-1])
+    ax.set_title(title, fontsize=11)
+axes[0].legend(loc="upper left", ncols=3)
+fig.tight_layout()
 ```
 
 What did the model learn? Permutation importance — scramble one feature, watch the error — gives the blunt answer:
 
 ```{python}
 #| label: fig-importance
-#| fig-cap: "Permutation importance for the boosted model. The lag features dominate: mostly, the model has learned to consult last week."
+#| fig-cap: "Permutation importance for the boosted model on the test window. The lag features dominate: mostly, the model has learned to consult last week."
 #| code-fold: true
-# TODO:data — permutation importance on the test window
+from sklearn.inspection import permutation_importance
+
+pi = permutation_importance(
+    models["gradient boosting"], X[test], y[test],
+    n_repeats=10, random_state=0, scoring="neg_mean_absolute_error",
+)
+imp = pd.Series(pi.importances_mean, index=X.columns).sort_values()
+fig, ax = plt.subplots(figsize=(7.5, 3.2))
+ax.barh(imp.index, imp, color=NAVY)
+ax.set_xlabel("MAE increase when the feature is scrambled (pedestrians/hour)")
+fig.tight_layout()
 ```
 
-Read importance plots the way you read a witness: for what they saw, not why it happened. *Important* here means *predictively load-bearing for this model on this street* — not causal, not transferable, not policy advice. The lag features dominating is the plot's way of agreeing with the baseline: memory is most of the signal, calendar handles the exceptions. When @sec-causal needs to know what *causes* foot traffic, none of this machinery will be admissible; that is not a flaw but a jurisdiction.
+Read importance plots the way you read a witness: for what they saw, not why it happened. *Important* here means *predictively load-bearing for this model on this street* — not causal, not transferable, not policy advice. The lag features dominating is the plot's way of agreeing with the baseline: memory is most of the signal, calendar handles the exceptions. And there is the holiday flag, scraping the bottom of the chart pages after the score table showed holidays are where the model pulls ahead. Both are true: holidays are 3% of hours, and an importance score averaged over the year drowns ten loud days in three hundred quiet ones. The witness saw what it saw, on average. When @sec-causal needs to know what *causes* foot traffic, none of this machinery will be admissible; that is not a flaw but a jurisdiction.
 
 ## Streets without labels
 
@@ -120,49 +258,138 @@ This is clustering, the most seductive and most abused tool in the unsupervised 
 ```{python}
 #| label: clustering
 #| code-summary: "Normalized weekly profiles, k selection, k-means"
-# TODO:data — profiles for sensors with sufficient history; silhouette
-# across k; fit final k-means
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+window = hourly[(hourly.ts >= "2024-07-01") & (hourly.ts < "2026-06-01")]
+coverage = window.groupby("sensor_id").size() / window.ts.nunique()
+full = coverage[coverage >= 0.9].index
+
+profiles = (
+    window[window.sensor_id.isin(full)]
+    .assign(dow=lambda d: d.ts.dt.dayofweek, hour=lambda d: d.ts.dt.hour)
+    .pivot_table(index="sensor_id", columns=["dow", "hour"], values="count", aggfunc="mean")
+    .dropna()
+)
+shapes = profiles.div(profiles.mean(axis=1), axis=0)   # each street ÷ its own mean
+
+fits = {k: KMeans(n_clusters=k, n_init=10, random_state=0).fit(shapes) for k in range(2, 9)}
+sil = pd.Series(
+    {k: silhouette_score(shapes, f.labels_) for k, f in fits.items()}, name="silhouette"
+)
+sil.round(3).to_frame().T
 ```
 
 ```{python}
 #| label: fig-clusters
-#| fig-cap: "Street personalities: mean weekly profile per cluster, every member sensor in light gray behind. The names are ours, not the algorithm's."
+#| fig-cap: "Street personalities: mean weekly profile per cluster at k = 4, every member sensor in light gray behind. The names are ours, not the algorithm's."
 #| code-fold: true
-# TODO:data — small-multiple cluster profiles; tentative names like
-# 'commuter artery', 'retail spine', 'nightlife strip', 'weekend destination'
+K = 4
+labels = pd.Series(fits[K].labels_, index=shapes.index)
+# Names assigned after meeting the clusters. Refit on fresher data and the
+# integer ids may shuffle — re-meet them before trusting the labels.
+CLUSTERS = [
+    (2, "the commuter turnstile"),
+    (0, "the nine-to-five street"),
+    (3, "the market-and-lunch street"),
+    (1, "the seven-day street"),
+]
+fig, axes = plt.subplots(2, 2, figsize=(9.5, 5.6), sharex=True, sharey=True)
+xs = np.arange(168)
+for ax, (c, cname) in zip(axes.flat, CLUSTERS):
+    members = shapes[labels == c]
+    for _, row in members.iterrows():
+        ax.plot(xs, row.values, color="#c9cdd2", lw=0.6)
+    ax.plot(xs, members.mean(), color=NAVY, lw=1.8)
+    for d in range(1, 7):
+        ax.axvline(d * 24, color="#e4e1d8", lw=0.6)
+    ax.set_xticks(np.arange(7) * 24 + 12, ["M", "T", "W", "T", "F", "S", "S"])
+    ax.set_title(f"{cname}  (n = {len(members)})", fontsize=10.5)
+    ax.set_xlim(0, 167)
+axes[0, 0].set_ylabel("× own weekly mean")
+axes[1, 0].set_ylabel("× own weekly mean")
+fig.tight_layout()
 ```
 
-<!-- TODO:data — prose tour of the clusters with named example streets; note silhouette verdict honestly (likely modest); the point that the city's functional zones emerge from rhythm alone, no land-use map consulted -->
+The algorithm's own verdict on its work comes first, and it is suitably lukewarm: the silhouette score peaks at a useless *k* = 2 — which merely separates commuter funnels from everything else — and drifts down from there, reading 0.26 at the *k* = 4 we show. These clusters are tendencies, not species. Verdict recorded, the four tendencies name themselves. **The commuter turnstile** (five sensors — Southern Cross Station, the Flinders Street myki barriers, the north face of Collins Place among them) spikes at 8 a.m. and 5 p.m. and dies on weekends. **The nine-to-five street** (fifteen, the Collins and Spencer Street corporate corners) keeps the same office hours with the edges sanded off — and, my favorite detail in the chapter, the University of Melbourne's three campus sensors land squarely inside it: rhythmically, a university is an office. **The market-and-lunch street** (fourteen: the Queen Victoria Market gates, Degraves Street, Bourke Street Mall's south face) works the noon shift seven days a week. And **the seven-day street** (forty: Town Hall, Princes Bridge, Chinatown, the Southbank promenade) simply absorbs whatever the week offers, evenings and weekends included — the connective tissue of the city center.
+
+There are surprises filed away in the gray lines, and they are the analysis's first interesting sentences rather than its errors. Webb Bridge — a residential footbridge in Docklands — clusters with the market streets, not the commuter spans, which says something about who actually crosses it and when. The two ends of Collins Place sit in *different* clusters, one a turnstile and one an office street; sixty meters of arcade, two personalities.
 
 Note what was *not* used: no land-use map, no zoning table, no knowledge of where the bars are. The clusters recover the city's functional anatomy from rhythm alone — and where a sensor lands in a surprising cluster, that is not an error to be smoothed away but the analysis's first interesting sentence. Unsupervised learning generates hypotheses, not findings. The findings come when a surprise survives a second dataset.
 
 ## The day the streets stopped
 
-On a Friday in March 2020, the State of Victoria declared a state of emergency, and over the following weeks the sensors recorded something no urban instrument had seen at this resolution: a great city's foot traffic falling toward zero and staying there. Melbourne would eventually endure six lockdowns — among the longest cumulative confinements of any city on earth — and every one of them is written in this table, hour by hour.
+On Monday 16 March 2020 the State of Victoria declared a state of emergency, and over the following weeks the sensors recorded something no urban instrument had seen at this resolution: a great city's foot traffic falling toward zero and staying there. Melbourne would eventually endure six lockdowns — among the longest cumulative confinements of any city on earth — and every one of them is written in this table, hour by hour.
 
 For the anomaly detector, this is the rare luxury of labeled catastrophe. The method is deliberately plain: model each sensor's *expected* hour from its own trailing weeks, score each observed hour by its distance from expectation in robust units, and average across the network into a single daily index of strangeness.
 
 ```{python}
 #| label: anomaly
 #| code-summary: "Trailing-baseline expectation and robust anomaly index"
-# TODO:data — rolling median-by-(dow,hour) baseline, MAD-scaled residuals,
-# citywide daily index
+arch = hourly[(hourly.ts >= "2018-10-01") & (hourly.ts < "2022-11-01")].copy()
+present = arch.groupby("sensor_id").size() / arch.ts.nunique()
+arch = arch[arch.sensor_id.isin(present[present >= 0.9].index)]
+arch["dow"], arch["hour"] = arch.ts.dt.dayofweek, arch.ts.dt.hour
+
+# Expectation: the trailing median of the last eight same-(weekday, hour)
+# observations. Spread: the trailing median absolute deviation around it.
+arch = arch.sort_values(["sensor_id", "dow", "hour", "ts"])
+KEY = ["sensor_id", "dow", "hour"]
+arch["expected"] = arch.groupby(KEY, sort=False)["count"].transform(
+    lambda s: s.shift(1).rolling(8, min_periods=4).median()
+)
+arch["resid"] = arch["count"] - arch["expected"]
+arch["abs_resid"] = arch.resid.abs()
+arch["spread"] = arch.groupby(KEY, sort=False)["abs_resid"].transform(
+    lambda s: s.shift(1).rolling(8, min_periods=4).median()
+)
+arch["z"] = arch.resid / (1.4826 * arch.spread + 1)   # +1: never divide by silence
+
+strangeness = (
+    arch.dropna(subset=["z"])
+    .assign(date=lambda d: d.ts.dt.normalize())
+    .groupby("date")["z"].mean()
+    .loc["2019-01-01":]                                # discard the warm-up
+)
+strangeness.reindex(
+    strangeness.abs().sort_values(ascending=False).head(10).index
+).round(1).to_frame("strangeness")
 ```
 
 ```{python}
 #| label: fig-anomaly
-#| fig-cap: "A daily index of strangeness, 2019–2022, lockdowns shaded. The detector, built from nothing but trailing medians, finds every lockdown boundary — and a few stranger things besides."
+#| fig-cap: "A daily index of strangeness, 2019–2022: the network-mean deviation from each sensor's trailing eight-week median, in robust units, lockdowns shaded. The detector screams at the reopenings, murmurs at the first plunge, and sleeps through the later lockdowns entirely — by then, empty was normal."
 #| code-fold: true
-# TODO:data — index timeline with lockdown shading and labeled spikes
+fig, ax = plt.subplots(figsize=(9.5, 4.0))
+for a, b in LOCKDOWNS:
+    ax.axvspan(pd.Timestamp(a), pd.Timestamp(b), color=BRICK, alpha=0.14, lw=0)
+ax.plot(strangeness.index, strangeness, color=NAVY, lw=0.7)
+ax.axhline(0, color="#9aa3ad", lw=0.6)
+ax.set_ylabel("network mean z")
+ax.set_ylim(-4.4, 8.6)
+note(ax, "New Year's morning", (pd.Timestamp("2020-01-01"), 6.1),
+     (pd.Timestamp("2019-03-01"), 6.9))
+note(ax, "reopening, Nov 2020", (pd.Timestamp("2020-11-14"), 5.4),
+     (pd.Timestamp("2020-04-01"), 5.9))
+note(ax, "the city pours back,\nOct–Nov 2021", (pd.Timestamp("2021-11-06"), 7.5),
+     (pd.Timestamp("2021-12-20"), 7.3))
+note(ax, "Cup Day empties the city", (pd.Timestamp("2019-11-05"), -1.9),
+     (pd.Timestamp("2019-05-15"), -3.3))
+note(ax, "Firelight fireworks,\nDocklands", (pd.Timestamp("2022-07-03"), 3.7),
+     (pd.Timestamp("2022-01-25"), 5.6))
+ax.set_title("Four years of ordinary weeks and extraordinary days")
+plt.show()
 ```
 
-<!-- TODO:data — table or prose of top-10 anomalous days; expected mix: lockdown starts/ends, New Year's Eve, AFL Grand Final, White Night, possibly a storm; tell the best non-obvious one -->
+The top of the strangeness table is a history lesson in ten rows: the two New Year's mornings, 2019 and 2020 — the one night when the small hours out-crowd the afternoons — and then eight days from the two reopening fortnights, October–November 2020 and October–November 2021, when the lockdowns *ended* and the city poured back onto streets the baseline still believed were empty. The beginnings barely chart. The plunge of March 2020 bottoms out near −3 and ranks around fiftieth; the first day of the sixth lockdown scores 0.0, indistinguishable from any wet Thursday. Partly this is the detector's amnesia — by August 2021 its eight-week memory contained mostly lockdown, so more lockdown surprised no one, least of all a median. But partly it is an asymmetry in the arithmetic itself: when a street empties, the worst that can happen is that *everyone* stays home, a deviation bounded by habit; when a street fills, there is no ceiling. The same index that caps catastrophe near −3 prints +7.5 for a reopening crowd.
+
+The supporting cast rewards reading. The most negative day outside a lockdown's opening week is Melbourne Cup Day 2019 — a public holiday that famously empties the city center, the race being elsewhere and the long weekend being everywhere — with the Grand Final's eve holiday close behind. The magnitude-5.9 earthquake of September 2021, the strongest in the state's recorded history, does not register at all: the streets it rattled were already vacant. And the best find sits at rank twenty: a Sunday in July 2022, driven entirely by the Docklands waterfront sensors running at five to eight times a normal winter Sunday. That is the Firelight Festival — a fireworks weekend on the harbour, rediscovered two years later by an arithmetic of medians that has never heard of fireworks. Exercise 3 says newspapers are admissible evidence; they confirm.
 
 Two species of strangeness appear, and the distinction matters more than the detection. An *outlier* is a day that breaks the pattern and releases it — the Grand Final empties the streets it does not border, and Monday returns as if nothing happened. A *regime change* is a day after which the old expectation is simply wrong; March 2020 is the type specimen. Detectors built on trailing baselines will flag a regime change loudly for a few weeks and then, having absorbed the new normal into the baseline, fall silent — the statistical equivalent of growing accustomed to the smell. Knowing which species you face determines whether the right response is to investigate a day or to retire a model.
 
 The pandemic also quietly sabotaged the previous section, and it is worth saying so. Any forecasting model trained across 2020–21 has eaten two years that contradict the other fourteen; any clustering of *average* profiles has averaged a street's before and after. The chapter's analyses dodged this — windows chosen after the recovery, profiles from settled years — but the dodge was a *choice*, made by a human who knew the history, not by the algorithm. The most consequential modeling decisions in this chapter never touched the model.
 
-## Honest evaluation {#sec-ml-honest}
+## Scoring without flattery {#sec-ml-honest}
 
 Everything above reported scores on held-out data. This final section is about how easy it is to hold data out and still cheat.
 
@@ -170,13 +397,33 @@ Everything above reported scores on held-out data. This final section is about h
 
 ```{python}
 #| label: fig-leakage
-#| fig-cap: "The same model, two evaluation designs. Random folds reward the model for memorizing the neighborhood of each hour; forward-chaining tells the truth about forecasting."
+#| fig-cap: "The same model, two evaluation designs, five folds each. Random folds reward the model for memorizing the neighborhood of each hour; forward-chaining tells the truth about forecasting."
 #| code-fold: true
-# TODO:data — shuffled K-fold vs TimeSeriesSplit on identical model/features;
-# paired bar or dot plot of MAE
+from sklearn.model_selection import KFold, TimeSeriesSplit, cross_val_score
+
+designs = {
+    "random folds": KFold(5, shuffle=True, random_state=0),
+    "forward-chaining": TimeSeriesSplit(5),
+}
+cv_mae = {
+    label: -cross_val_score(
+        HistGradientBoostingRegressor(max_iter=500, learning_rate=0.06, random_state=0),
+        X[ok], y[ok], cv=cv, scoring="neg_mean_absolute_error",
+    )
+    for label, cv in designs.items()
+}
+fig, ax = plt.subplots(figsize=(8, 2.6))
+for i, (label, maes) in enumerate(cv_mae.items()):
+    c = [GOLD, NAVY][i]
+    ax.scatter(maes, [i] * len(maes), s=46, color=c, zorder=3)
+    ax.plot([maes.mean()] * 2, [i - 0.22, i + 0.22], color=c, lw=2.6)
+ax.set_yticks([0, 1], list(cv_mae))
+ax.set_ylim(-0.6, 1.6)
+ax.set_xlabel("MAE per fold (pedestrians/hour); bar marks the mean")
+fig.tight_layout()
 ```
 
-<!-- TODO:data — state the actual optimism gap, e.g. "random folds flatter the model by X%" -->
+On the Town Hall data the gap is not subtle: random folds score the identical model and features at an MAE of 171; forward-chaining says 259. The shuffled design flatters by a third — an entire imaginary research contribution, conjured by the evaluation alone. Notice too that forward-chaining's five folds disagree with one another, roughly 185 to 310, because the early folds train on a few thin months. That spread is not a defect; it is information about how much history this model needs, which the shuffled design politely hides.
 
 Space leaks exactly as time does. Add a feature like *the count at the nearest other sensor, same hour* and watch the scores soar — the model has discovered that adjacent streets are simultaneously busy, which is geography, not foresight, and unavailable when forecasting next week. The general rule survives every special case: **evaluation must rehearse deployment.** Decide what the model will genuinely know at the moment of use, and permit it nothing else at the moment of judgment. When @sec-spatial formalizes spatial dependence, and when @sec-causal builds entire research designs out of what-was-knowable-when, this rule will already be an old friend.
 
@@ -190,16 +437,16 @@ Melbourne did not start counting pedestrians because sensors became cheap. It st
 The lineage is worth remembering when the machine learning gets absorbing. Whyte filmed plazas to learn *why* people stay — the sittable ledge, the sun, the other people. Gehl counted to convict a city of neglecting its public rooms and then to certify the repair. The sensors count magnificently and explain nothing; the explaining is still done the old way, by someone standing in the street, watching. The dataset is the heir of a humanism, and it has not outgrown its parents.
 :::
 
-A counting machine bolted above a shopping street is an unglamorous instrument, and sixteen years of its output have now carried a chapter. That is the general lesson, and it compounds: the patient sensor beats the clever snapshot, in cities as in astronomy. Melbourne decided in 2009 that attention to its streets was worth automating, and every analysis in this chapter — the forecasts, the street personalities, the canyon and the climb back out — was interest paid on that decision.
+A counting machine bolted above a shopping street is an unglamorous instrument, and seventeen years of its output — minus the nineteen months the portal mislaid — have now carried a chapter. That is the general lesson, and it compounds: the patient sensor beats the clever snapshot, in cities as in astronomy. Melbourne decided in 2009 that attention to its streets was worth automating, and every analysis in this chapter — the forecasts, the street personalities, the canyon and the climb back out — was interest paid on that decision.
 
 The next chapter keeps the habit of suspicion and adds a dimension we have been treating as a nuisance. The sensors disagreed with each other *in space*; streets resembled their neighbors; geography kept trying to leak into the models. In @sec-spatial, space stops being a leak and becomes the subject.
 
 ## Exercises {.unnumbered}
 
-1. **Beat the chapter.** Using any model and any honestly-available features, improve on the boosted model's test MAE at the anchor sensor — same forward-in-time split, no peeking. Report your error, your baseline's, and the hour-of-week where your model fails worst, with a hypothesis for why.
+1. **Beat the chapter.** Using any model and any features that would exist at forecast time, improve on the boosted model's test MAE at the anchor sensor — same forward-in-time split, no peeking. Report your error, your baseline's, and the hour-of-week where your model fails worst, with a hypothesis for why.
 2. **The uneven recovery.** Compute each cluster's 2025 traffic as a share of its 2019 level. Which street personalities recovered and which did not? Write the one-paragraph memo a city economist would actually want, including the number you trust least.
 3. **The strange day.** Find the most anomalous non-pandemic day in the record and identify the real-world event behind it. Newspapers are admissible evidence. If you find a day you *cannot* explain, you have found something better; document it.
-4. **Weather, honestly.** Add rainfall and temperature from the Bureau of Meteorology — as a deployed forecaster would have them, which is to say as *forecasts*, or failing that, lagged observations only. Report the improvement and whether it survives the honesty constraint.
+4. **Weather, by the rules.** Add rainfall and temperature from the Bureau of Meteorology — as a deployed forecaster would have them, which is to say as *forecasts*, or failing that, lagged observations only. Report the improvement and whether it survives that constraint.
 5. **The next sensor.** The city can afford five more sensors. Propose locations, the question each would answer, and — the part that separates analysts from vendors — the bias your placement scheme builds into every future citywide statistic.
 
 ## Further reading {.unnumbered}

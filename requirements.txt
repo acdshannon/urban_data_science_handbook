@@ -37,6 +37,7 @@ plotly
 folium
 pydeck
 mapclassify
+numba  # fast classifiers for mapclassify
 
 # Imagery & deep learning (Part VI)
 pystac-client
@@ -55,3 +56,4 @@ requests
 sodapy
 duckdb
 pyarrow
+holidays
