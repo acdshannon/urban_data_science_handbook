@@ -19,9 +19,9 @@ Moran's I and its scatterplot; LISA maps and hot/cold spots (Getis–Ord); disti
 
 Kernel density done honestly; Ripley's K and friends; testing whether robberies cluster beyond the clustering of everything (population, roads, opportunity).
 
-## Spatial regression
+## Regression II: space enters the model
 
-When OLS residuals have geography; spatial lag and spatial error models; crime against marginalization, density, and land use — and how conclusions change when space enters.
+When OLS residuals have geography; spatial lag and spatial error models; crime against marginalization, density, and land use — and how conclusions change when space enters. (Pays off the promise of @sec-stats's Regression I.)
 
 ## The modifiable areal unit problem
 

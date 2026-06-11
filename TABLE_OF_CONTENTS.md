@@ -83,7 +83,7 @@ The prediction toolkit on one of the world's longest-running urban sensing progr
 
 Space as signal. Latin America's richest open crime data meets a census-based deprivation index.
 
-5.1 Tobler's law and spatial weights · 5.2 Global and local autocorrelation (Moran's I, LISA, hot spots) · 5.3 Point patterns (KDE, Ripley's K) · 5.4 Spatial regression (lag/error; crime vs. marginalization) · 5.5 The modifiable areal unit problem
+5.1 Tobler's law and spatial weights · 5.2 Global and local autocorrelation (Moran's I, LISA, hot spots) · 5.3 Point patterns (KDE, Ripley's K) · 5.4 Regression II: space enters the model (lag/error; crime vs. marginalization — pays off ch. 3's "Regression I") · 5.5 The modifiable areal unit problem
 
 - **Anchor:** [Carpetas de investigación FGJ-CDMX](https://datos.cdmx.gob.mx/dataset/carpetas-de-investigacion-fgj-de-la-ciudad-de-mexico) — ~2M point-located investigations since 2016, monthly updates, keyless; joined to [CONAPO urban marginalization index 2020](https://www.gob.mx/conapo/documentos/indices-de-marginacion-2020-284372) at AGEB level.
 - **Theory sidebar:** from Burgess's concentric zones to Shaw & McKay — a century of crime cartography and what it criminalized.
