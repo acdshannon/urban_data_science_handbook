@@ -57,3 +57,4 @@ sodapy
 duckdb
 pyarrow
 holidays
+pyrosm  # only needed to rebuild the Tokyo street snapshot (plus osmium-tool)

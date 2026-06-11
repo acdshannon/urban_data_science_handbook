@@ -1,45 +1,348 @@
 # Urban Networks {#sec-networks}
 
+> *"…whether anyone could arrange a route in such a way that he crossed each bridge once and only once."*
+> — Leonhard Euler, on the bridges of Königsberg (1736)
+
 ::: {.callout-tip appearance="simple"}
 ## Anchor: Tokyo
-**Dataset** — the world's densest rail system: every line and station nationwide from Japan's [MLIT National Land Numerical Information railway data (N02)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-2025.html) — keyless GeoJSON download, government open license (CC BY 4.0-compatible), with the N05 time-series edition for the network's growth since 1950 — optionally enriched with timetable feeds from [ODPT](https://developer.odpt.org/) (free registration); street networks anywhere on Earth via OpenStreetMap and OSMnx. *Verified June 2026.*
+**Dataset** — the world's densest rail system: every line and station in Japan from [MLIT's National Land Numerical Information railway file (N02, 2025 edition)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-2025.html) — keyless GeoJSON, government open license (CC BY 4.0-compatible). Street morphology via OpenStreetMap (Geofabrik extracts, ODbL) and Boeing's [Global Urban Street Networks Indicators](https://doi.org/10.7910/DVN/ZTFPTB) (CC0). Timetable feeds from [ODPT](https://developer.odpt.org/) (free registration) extend everything here into the time dimension. *Verified June 2026.*
 :::
 
-Tokyo moves forty million people through a lattice of interpenetrating rail systems — the perfect specimen for network science. We build the city as a graph twice: its streets (from OpenStreetMap) and its rails (from Japan's open transport data), then ask the discipline's questions. Where does the network concentrate? What communities does it imply? And the chapter's centerpiece: how many stations can Tokyo lose before it falls apart — and which five matter most?
+Graph theory is urban science's gift to mathematics, not the other way around. When Euler dismissed the burghers of Königsberg in 1736 — no, you cannot stroll your seven bridges exactly once each, and here is why no rearrangement of riverbanks will save you — he had invented the network: the discovery that for some questions, all that matters about a place is what connects to what. Distances, widths, the price of the houses on the bridge — discardable. The pattern of connection decides.
+
+Tokyo is the planet's most serious test of that idea. Forty million people move through Greater Tokyo on a lattice of interpenetrating rail systems — one national operator, two subway authorities, nine major private railways, a scattering of monorails and people-movers — that carries more passengers than the rail networks of most continents. This chapter builds the city as a graph twice, streets and rails, and then asks the network scientist's questions. Where does the structure concentrate? What sub-cities does it secretly contain? And the question the chapter has been built around: how much damage can the lattice absorb?
+
+```{python}
+#| label: setup
+#| code-summary: "Chapter setup"
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import pandas as pd
+
+from book_style import set_style, note, PALETTE, NAVY, GOLD, TEAL, BRICK
+
+set_style()
+rng = np.random.default_rng(0)
+SNAP = Path("data/snapshots/tokyo_rail")
+
+nodes = pd.read_csv(SNAP / "nodes.csv")
+edges = pd.read_csv(SNAP / "edges.csv")
+
+G = nx.Graph()
+for r in nodes.itertuples():
+    G.add_node(r.id, name=r.name, romaji=r.romaji, x=r.x, y=r.y)
+for r in edges.itertuples():
+    G.add_edge(r.u, r.v, line=r.line, operator=r.operator, kind=r.kind, km=r.km)
+f"{G.number_of_nodes():,} stations, {G.number_of_edges():,} edges"
+```
 
 ## The city as graph
 
-Nodes, edges, weights, direction; primal and dual representations of streets; what graph abstraction keeps and what it throws away.
+A *graph*: a set of nodes and a set of edges saying which nodes touch. The definition's poverty is its power — and the work of network analysis is mostly done before any algorithm runs, in deciding what becomes a node, what becomes an edge, and what gets thrown away.
+
+The graph above was built from the ministry's raw geometry by a chain of such decisions, each one defensible and none innocent (the construction code lives in `scripts/fetch_tokyo.py`; the chapter inherits its choices and will, at one point, be embarrassed by one). Platforms sharing a name within 600 meters merged into single stations. Consecutive stops along each line's track became edges, with the Yamanote loop closed by hand because a ring has no first station. Stations within 300 meters of each other gained walk-transfer edges, on the theory that Tokyo pedestrians regard 300 meters of corridor as a rounding error. And the Shinkansen was deleted entirely: a bullet train that leaps from Tokyo Station to Yokohama in one bound is a fact about Japan, not about the city, and leaving it in lets intercity shortcuts swamp every shortest path in the analysis. What survives is Greater Tokyo within 45 kilometers of Tokyo Station: **1,223 stations and 1,502 edges**, every analysis in this chapter downstream of the choices just confessed.
+
+Notice the exchange rate. The ministry's file knows track gauges, opening dates, the shapes of curves; the graph knows none of it. No timetables, no capacities, no crowds — an abstraction that will feel reckless until it starts answering questions geometry cannot.
+
+```{python}
+#| label: fig-network
+#| fig-cap: "Greater Tokyo's rail lattice as a graph: 1,223 stations, 1,502 edges, the Yamanote loop in gold. Radial private-railway corridors feed a dense interchange core — a structure the rest of the chapter will keep rediscovering by other means."
+#| code-fold: true
+pos = {r.id: (r.x / 1000, r.y / 1000) for r in nodes.itertuples()}
+fig, ax = plt.subplots(figsize=(8.6, 8.6))
+for u, v, d in G.edges(data=True):
+    color, lw = (GOLD, 2.2) if d["line"] == "山手線" else (NAVY, 0.55)
+    ax.plot(*zip(pos[u], pos[v]), color=color, lw=lw,
+            alpha=0.9 if lw > 1 else 0.45, zorder=2 if lw > 1 else 1)
+ax.scatter(*zip(*pos.values()), s=4, color=NAVY, alpha=0.5, zorder=3)
+outer = {"Yokohama": (4, -10), "Omiya": (4, 4), "Chiba": (4, 4),
+         "Nishi-Funabashi": (4, 6), "Tachikawa": (-6, 8)}
+core = {"Tokyo": (46, -16), "Shinjuku": (-66, 6), "Shibuya": (-52, -30),
+        "Ikebukuro": (-58, 34), "Ueno": (40, 26)}
+for nm, off in outer.items():
+    row = nodes[nodes.romaji == nm].iloc[0]
+    ax.annotate(nm, (row.x / 1000, row.y / 1000), xytext=off,
+                textcoords="offset points", fontsize=8.5, fontstyle="italic")
+for nm, off in core.items():
+    row = nodes[nodes.romaji == nm].iloc[0]
+    ax.annotate(nm, (row.x / 1000, row.y / 1000), xytext=off,
+                textcoords="offset points", fontsize=8.5, fontstyle="italic",
+                arrowprops={"arrowstyle": "-", "color": "#9aa3ad", "lw": 0.7, "shrinkB": 2})
+ax.set_aspect("equal")
+ax.set_axis_off()
+ax.set_title("The lattice, with the Yamanote ring")
+plt.show()
+```
 
 ## Street networks and urban morphology
 
-OSMnx and the one-line city download; orientation entropy, block sizes, connectivity measures; a cameo gallery comparing the grids of thirty world cities.
+Before interrogating the rails, look down at the streets they fly over, because the contrast is the point. A street network is also a graph — intersections for nodes, street segments for edges — and one of the field's small pleasures is that a city's entire street fabric can be summarized by a compass. Take every street segment, measure its bearing, weight by length, and pile the bearings into a rose. A gridded city makes a cross; an organic one makes a disc.
+
+```{python}
+#| label: fig-roses
+#| fig-cap: "Left: the orientation rose of central Tokyo (13 × 11 km core, every street weighted by length) — east–west arterials spike out of a disc of disagreement, and the disc wins: entropy 3.53 of a possible 3.58. Right: thirty world cities ranked by Boeing's orientation entropy, between a perfect four-direction grid (ln 4) and perfect disorder (ln 36). Tokyo keeps company with the most disordered street fabrics on earth."
+#| code-fold: true
+bearings = pd.read_csv(SNAP / "tokyo_bearings.csv")
+gallery = pd.read_csv(SNAP / "street_gallery.csv")
+
+fig = plt.figure(figsize=(10, 5.2))
+axr = fig.add_subplot(1, 2, 1, projection="polar")
+theta = np.radians(np.concatenate([bearings.bin_deg, bearings.bin_deg + 180]) + 2.5)
+w = np.concatenate([bearings.length_weight, bearings.length_weight])
+axr.bar(theta, w, width=np.radians(5), color=NAVY, alpha=0.85)
+axr.set_theta_zero_location("N")
+axr.set_theta_direction(-1)
+axr.set_yticks([])
+axr.set_thetagrids([0, 45, 90, 135, 180, 225, 270, 315],
+                   ["N", "", "E", "", "S", "", "W", ""])
+axr.set_title("central Tokyo, by compass", fontsize=11, pad=14)
+
+axg = fig.add_subplot(1, 2, 2)
+g = gallery.sort_values("orientation_entropy")
+labels = g.core_city.str.replace("_", " ").str.replace("north canberra canberra", "canberra").str.title()
+ys = np.arange(len(g))
+colors = [GOLD if c == "tokyo" else NAVY for c in g.core_city]
+axg.scatter(g.orientation_entropy, ys, s=26, c=colors, zorder=3)
+axg.set_yticks(ys, labels, fontsize=7.8)
+axg.axvline(np.log(4), color=BRICK, lw=0.9, ls="--")
+axg.axvline(np.log(36), color=BRICK, lw=0.9, ls="--")
+axg.text(np.log(4), len(g) + 0.5, "perfect grid", fontsize=8, ha="center", fontstyle="italic", color=BRICK)
+axg.text(np.log(36), len(g) + 0.5, "disorder", fontsize=8, ha="center", fontstyle="italic", color=BRICK)
+axg.set_xlabel("orientation entropy (nats)")
+fig.tight_layout()
+```
+
+The gallery rewards a slow column scan. At the orderly end sits Chicago (2.47), then Detroit and Houston — the surveyor's America, where one 1785 land ordinance ruled the continent into squares a century before the cities arrived. Buenos Aires, the gallery's intersection champion, runs 52% four-way crossings on a near-perfect colonial grid. At the entropic end, São Paulo and Paris brush against the mathematical ceiling of disorder, and Tokyo — entropy 3.57 of a possible 3.58, our own core measuring 3.53 — sits among them. Its rose has knuckles: the postwar arterials insist on east–west, and the compass concedes them a few long spikes. But the spikes sit on a disc, and the disc carries the mass. Tokyo's streets never agreed on a north — the city burned and rebuilt, village by village, around castle moats and rice-field boundaries and Edo-era roads, and no Haussmann ever won.
+
+Which sharpens the question of how forty million people navigate it. The answer is the gold ring in the first figure. Where the street fabric refuses to organize, the rail network *is* the organization — the coordinate system, the mental map, the address ("three minutes from the west exit"). In Chicago the grid orients you; in Tokyo the lattice does. The rest of the chapter takes that lattice apart.
 
 ## Centrality: where the city concentrates
 
-Degree, betweenness, closeness on rails and streets; why Shinjuku keeps winning; centrality as predicted footfall (back-checked against ideas from @sec-ml).
+*Betweenness centrality*: the share of all shortest paths that pass through a node. It is the network's own answer to "which stations carry the structure," and it comes with a warning the textbooks underplay: *shortest* is a choice. Count paths by number of stops and you get one city; count by kilometers of track and you get another.
+
+```{python}
+#| label: centrality
+#| code-summary: "Betweenness two ways: hops and kilometers"
+bc_hops = nx.betweenness_centrality(G)
+bc_km = nx.betweenness_centrality(G, weight="km")
+rom = nodes.set_index("id").romaji
+
+top = pd.DataFrame({
+    "by stop count": pd.Series(bc_hops).nlargest(10).index.map(rom),
+    "bc (hops)": pd.Series(bc_hops).nlargest(10).round(3).values,
+    "by track km": pd.Series(bc_km).nlargest(10).index.map(rom),
+    "bc (km)": pd.Series(bc_km).nlargest(10).round(3).values,
+})
+top.index = range(1, 11)
+top
+```
+
+Neither column contains the station you expected. Guinness lists Shinjuku as the busiest railway station on earth — three and a half million passengers a day through its two hundred exits — yet by stop-count betweenness it does not crack the top eight, and by track-kilometers it places fourth. The hop-count column is stranger still: it crowns Musashi-Kosugi and Nishi-Funabashi, with Nishi-Kokubunji, Motosumiyoshi, and Minami-Nagareyama — stations many Tokyo residents could not place on a map — filling the ranks.
+
+The strangeness is the lesson, twice over. First: in a hop-count world, crossing dense central Tokyo costs a fortune in stops (the Ginza line manages 19 of them in 14 kilometers), so shortest paths flee to the *orbitals* — above all the Musashino line, a freight bypass opened in 1973 that traces a 30-kilometer arc around the city and crosses every radial trunk it meets. Its interchange stations are the hop-rankings' secret aristocracy. Weight by kilometers and the center is rehabilitated: Shinjuku, Shinagawa, Tokyo, Shibuya, Ikebukuro, and Ueno all surface, alongside the orbital hubs that genuinely do knit the lattice together. Second: Yurakucho's silver medal in the kilometer column is partly our own artifact — it sits one 300-meter walk-transfer from the Tokyo Station complex, and our transfer threshold quietly deputized it. The construction choices of §6.1, visible in the rankings of §6.3. I trust neither column unaccompanied, and that is the posture to take into any centrality table: the measure answers precisely the question its weights define — *predicted load on the geometry* — and fame, footfall, and importance are different questions. @sec-ml's forecasting discipline applies unchanged: a measure earns belief by predicting something you did not feed it.
+
+```{python}
+#| label: fig-centrality
+#| fig-cap: "The same network, two definitions of 'between.' Node area is proportional to betweenness. Counting stops (left) exiles importance to the orbital interchanges; counting kilometers (right) restores the familiar hubs without dethroning the orbitals. The metric is part of the message."
+#| code-fold: true
+fig, axes = plt.subplots(1, 2, figsize=(10, 5.4))
+for ax, bc, title in [(axes[0], bc_hops, "shortest = fewest stops"),
+                      (axes[1], bc_km, "shortest = fewest kilometers")]:
+    for u, v in G.edges():
+        ax.plot(*zip(pos[u], pos[v]), color=NAVY, lw=0.35, alpha=0.3, zorder=1)
+    xs = [pos[n][0] for n in G.nodes]; ys = [pos[n][1] for n in G.nodes]
+    s = np.array([bc[n] for n in G.nodes])
+    ax.scatter(xs, ys, s=4 + 900 * s, color=BRICK, alpha=0.6, zorder=2, lw=0)
+    ax.set_aspect("equal"); ax.set_axis_off()
+    ax.set_title(title, fontsize=11)
+fig.tight_layout()
+```
 
 ## Communities and cores
 
-Modularity and community detection on the rail network versus official wards; the polycentric city revealed by its own connectivity.
+Flip the question from *which nodes matter* to *which nodes belong together*. *Modularity*: a score for a proposed division of the network, high when edges concentrate within groups and starve between them; community detection searches for the division that maximizes it.
+
+```{python}
+#| label: communities
+#| code-summary: "Louvain communities and modularity"
+comms = nx.community.louvain_communities(G, seed=0)
+modularity = nx.community.modularity(G, comms)
+membership = {n: i for i, c in enumerate(comms) for n in c}
+f"{len(comms)} communities, modularity = {modularity:.2f}"
+```
+
+```{python}
+#| label: fig-communities
+#| fig-cap: "Louvain communities of the rail graph (modularity 0.88 — emphatically modular). The algorithm received no geography, yet every community is a contiguous territory: the private railways' radial fiefdoms, each gathered around its own terminal."
+#| code-fold: true
+cmap = plt.cm.tab20(np.linspace(0, 1, 20))
+fig, ax = plt.subplots(figsize=(8.6, 8.6))
+for u, v in G.edges():
+    same = membership[u] == membership[v]
+    ax.plot(*zip(pos[u], pos[v]), color="#c9cdd2" if not same else
+            cmap[membership[u] % 20], lw=0.5 if not same else 0.9,
+            alpha=0.5 if not same else 0.9, zorder=1)
+xs = [pos[n][0] for n in G.nodes]; ys = [pos[n][1] for n in G.nodes]
+ax.scatter(xs, ys, s=7, c=[cmap[membership[n] % 20] for n in G.nodes], zorder=2, lw=0)
+for nm in ["Shinjuku", "Tokyo", "Ueno", "Shibuya", "Yokohama", "Omiya",
+           "Nishi-Funabashi", "Tachikawa", "Kita-Senju"]:
+    row = nodes[nodes.romaji == nm].iloc[0]
+    ax.annotate(nm, (row.x / 1000, row.y / 1000), xytext=(3, 3),
+                textcoords="offset points", fontsize=8.5, fontstyle="italic")
+ax.set_aspect("equal"); ax.set_axis_off()
+ax.set_title("Twenty-four sub-cities, found by arithmetic")
+plt.show()
+```
+
+The algorithm was handed a bare edge list — no coordinates, no operators, no history — and returned Tokyo's actual anatomy. Each community is one of the radial corridors: a private railway's territory, gathered around the terminal where it delivers its passengers to the Yamanote ring. That reflects a fact of corporate history. Tokyo's private railways did not just lay track; they built the suburbs the track served — department stores at the terminal, housing estates down the line, a university relocated here, a baseball stadium planted there — so that each corridor grew as one company's vertically integrated world. Shibuya anchors the Tokyu country; Shinjuku and Ikebukuro split the west between Odakyu, Keio, and Seibu-Tobu; Ueno and Kita-Senju open the northeast. The polycentric city the planners describe — and the ward map only loosely captures — is sitting in the modularity score. Where an official boundary and a network community disagree, bet on the network: people live along their line.
+
+A community detector, like the clusterers of @sec-ml, will partition anything you hand it, and a modularity of 0.88 is unusually decisive. The control is the same as ever: shuffle the edges, keep the degrees, and watch the modularity of the best partition collapse — structure this strong does not happen by accident of wiring.
 
 ## Breaking the network
 
-Percolation and targeted attack: random failures versus deliberate removals; measuring resilience; the stations whose loss costs Tokyo the most.
+How many stations can Tokyo afford to lose? The chapter was designed around the question, and the data's first answer is that the question flatters the attacker.
+
+The method is *percolation* in reverse: remove nodes, watch the *giant component* — the largest connected piece, the fraction of the city still mutually reachable — and compare two regimes. Random failure removes stations by lottery: signal faults, floods, the ordinary bad luck of infrastructure. Targeted attack removes, at each step, the station with the highest betweenness *recomputed on what remains* — an adversary with this chapter's tools.
+
+```{python}
+#| label: percolation
+#| code-summary: "Random failure vs. recomputed-betweenness attack"
+N = G.number_of_nodes()
+def gcc_frac(H):
+    return max((len(c) for c in nx.connected_components(H)), default=0) / N
+
+random_curves = []
+for _ in range(10):
+    H = G.copy()
+    xs = [(0, 1.0)]
+    for i, n in enumerate(rng.permutation(list(G.nodes))[: int(0.5 * N)]):
+        H.remove_node(n)
+        if (i + 1) % 12 == 0:
+            xs.append((i + 1, gcc_frac(H)))
+    random_curves.append(xs)
+
+H = G.copy()
+attack_curve, removed = [(0, 1.0)], []
+for step in range(60):
+    bc = nx.betweenness_centrality(H, weight="km", k=400, seed=1)
+    target = max(bc, key=bc.get)
+    removed.append(rom[target])
+    H.remove_node(target)
+    attack_curve.append((step + 1, gcc_frac(H)))
+
+# the cost of the five "most important" losses, measured in detour
+pair_rng = np.random.default_rng(42)
+pairs5 = [(a, b) for a, b in zip(pair_rng.choice(list(G.nodes), 400),
+                                 pair_rng.choice(list(G.nodes), 400)) if a != b]
+def mean_km(graph):
+    dists = []
+    for a, b in pairs5:
+        if a in graph and b in graph:
+            try:
+                dists.append(nx.shortest_path_length(graph, a, b, weight="km"))
+            except nx.NetworkXNoPath:
+                pass
+    return np.mean(dists)
+H5 = G.copy()
+H5.remove_nodes_from([n for n in G.nodes if rom[n] in removed[:5]])
+detour = mean_km(H5) / mean_km(G) - 1
+
+pd.Series({
+    "first five removed": ", ".join(removed[:5]),
+    "giant component after 5 targeted": f"{attack_curve[5][1]:.1%}",
+    "mean journey, after those 5": f"+{detour:.1%}",
+    "after 20 targeted": f"{attack_curve[20][1]:.1%}",
+    "after 60 targeted (5% of stations)": f"{attack_curve[60][1]:.1%}",
+})
+```
+
+```{python}
+#| label: fig-percolation
+#| fig-cap: "Percolation, two ways to die. Random failure (gray band: ten trials) costs the network almost nothing for hundreds of removals. A betweenness-guided attack (brick) holds the giant component above 95% for its first twenty moves — and then finds the seam, and the lattice comes apart."
+#| code-fold: true
+fig, ax = plt.subplots(figsize=(8.6, 4.4))
+for xs in random_curves:
+    k, v = zip(*xs)
+    ax.plot(np.array(k) / N * 100, v, color="#9aa3ad", lw=0.8, alpha=0.55)
+k, v = zip(*attack_curve)
+ax.plot(np.array(k) / N * 100, v, color=BRICK, lw=2.0)
+ax.set_xlabel("stations removed (%)")
+ax.set_ylabel("giant component share")
+ax.set_xlim(0, 27); ax.set_ylim(0, 1.02)
+note(ax, "random failure:\nten lotteries", (20, 0.77), (21.5, 0.9))
+note(ax, "targeted attack", (3.3, 0.55), (7.5, 0.35))
+ax.set_title("Robust to misfortune, fragile to attention")
+plt.show()
+```
+
+Read the brick curve's two acts. Act one, the humiliation of the attacker: take out the five highest-betweenness stations — Nishi-Funabashi, Yurakucho, Musashi-Kosugi, Shinagawa, Asakusabashi — and the giant component still holds 98.9% of the city; the mean journey lengthens by all of 7%. Tokyo shrugs. There is no five-station kill switch, and that is not luck but design value: a century of competing operators, redundant radials, and orbital stitching means every severed hub has a detour. The right answer to "which five stations matter most?" is that the question describes a different, more fragile city.
+
+Act two is the rebuke to complacency. The attack keeps consulting the wreckage — recomputing betweenness after every removal, always cutting at the new narrowest point — and around the twentieth removal it stops pruning and starts severing. By sixty stations, 5% of the network, the giant component is 9%: an archipelago. The gray band, meanwhile, ambles along near 88% at the same removal count. This asymmetry — *robust to random failure, fragile to informed attack* — is the signature of every network whose load concentrates anywhere, and Tokyo earns it honorably: the concentration that makes the lattice efficient is exactly what a sufficiently patient adversary climbs down. Resilience to misfortune and resilience to malice are different engineering problems.
 
 ## Multilayer and temporal networks
 
-Rail + metro + bus as coupled layers; transfers as inter-layer edges; how the network breathes across the day.
+The graph has been speaking of "the network," and Tokyo's commuters would object: there is no such thing. There is JR East (319 of our stations), Tokyo Metro (141), the Toei subway (140), Tokyu, Tobu, Seibu, Keisei, Keio, Odakyu — thirty operators in this graph once the monorails and people-movers are counted, each with its own tracks, fares, and gates. The truer model is a *multilayer network*: one layer per operator, coupled wherever a passenger can change between them.
+
+```{python}
+#| label: layers
+#| code-summary: "Operator layers and their coupling"
+op_stations = {}
+for u, v, d in G.edges(data=True):
+    if d["kind"] == "rail":
+        op_stations.setdefault(d["operator"], set()).update([u, v])
+
+H = G.copy()
+H.remove_edges_from([(u, v) for u, v, d in H.edges(data=True) if d["kind"] == "transfer"])
+H.remove_nodes_from(list(nx.isolates(H)))
+
+pairs = [(a, b) for a, b in zip(rng.choice(list(G.nodes), 300),
+                                rng.choice(list(G.nodes), 300)) if a != b]
+crossings = []
+for a, b in pairs:
+    path = nx.shortest_path(G, a, b, weight="km")
+    ops = {G.edges[u, v]["operator"] for u, v in zip(path, path[1:])
+           if G.edges[u, v]["kind"] == "rail"}
+    crossings.append(len(ops))
+
+pd.Series({
+    "operators in the graph": len(op_stations),
+    "components if walk transfers vanish": nx.number_connected_components(H),
+    "journeys using 2+ operators": f"{np.mean(np.array(crossings) >= 2):.0%}",
+    "mean operators per journey": round(np.mean(crossings), 2),
+})
+```
+
+The coupling is the system. On 300 random journeys, 97% cross at least one operator boundary, and the average journey uses the tracks of nearly four companies — a federation behaving, from the passenger's seat, like a single machine. The machine has two kinds of glue. Walk transfers, our 300-meter edges, turn out to be surprisingly dispensable: delete every one and the lattice falls into only four pieces, because the operators already meet inside shared station complexes — Shibuya is one node wearing three companies' logos. The deeper glue, invisible to this chapter's static graph, is *through-running*: trains that change owners mid-journey, a Tokyu express becoming a Metro train becoming a Tobu local without anyone leaving their seat. Tokyo has spent seventy years turning inter-layer edges into non-events.
+
+What the static graph cannot see at all is time — the network breathing, 20-trains-an-hour rush arteries thinning to night frequencies, the last-train cascade that empties the city at midnight. Those edges have schedules, and the ODPT timetable feeds (the registration the anchor box mentions) put weights on every one of them. That extension is yours in the exercises; the topology, this chapter's subject, is the skeleton the schedules hang on.
+
+A skeleton, it turns out, with opinions. The lattice concentrates where the orbitals cross the radials, partitions itself into the private railways' century-old fiefdoms, shrugs off any five losses, and shatters under sixty informed ones. None of that required a timetable, a passenger count, or a yen of fare data. The pattern of connection decides — Euler's discovery, still paying dividends on the far side of the planet from Königsberg.
+
+In @sec-mobility the trains get passengers: flows, gravity, the daily tide of forty million. The graph stops being a skeleton and starts being a circulatory system.
 
 ::: {.callout-note}
-## Theory sidebar (planned)
-**"A city is not a tree"** — Christopher Alexander's 1965 argument that real cities are semilattices, not hierarchies, and why it reads today as a network-science manifesto written before its mathematics existed.
+## "A city is not a tree"
+
+In 1965 the architect Christopher Alexander published a short essay with a mathematician's title and a polemicist's heart. Planned cities fail, he argued, because planners think in *trees* — hierarchies where every unit nests inside exactly one parent: house in block, block in neighborhood, neighborhood in district, each connected upward and nowhere else. Real cities that people love are *semilattices*: structures drenched in overlap, where the newsstand belongs simultaneously to the station's commuters, the street's residents, and the schoolchildren cutting through. The tree, he wrote, is the structure of a city designed to be administered; the semilattice is the structure of a city designed to be lived in.
+
+Alexander was doing network science a decade before the field had a name, and this chapter has been vindicating him from the start. Our community detection found 24 modules — but look again at the map: the hub stations sit at the *seams*, claimed by several communities at once, exactly the overlap a tree forbids. The multilayer section found a city where every journey braids together the territories of four companies. Tokyo works precisely because it is not a tree — no single hierarchy contains it, and its redundant, overlapping, semilattice connectivity is what the percolation experiment was measuring when the random-failure curve refused to fall. When a network analysis of a city comes out looking like a clean tree, suspect the analysis before the city.
 :::
 
 ## Exercises {.unnumbered}
 
-*Planned: compute orientation entropy for a city of your choice and place it in the chapter's gallery; find the minimum station set disconnecting two wards; compare centrality rankings across layers.*
+1. **Your city's rose.** Compute the orientation histogram for a city you know, using a Geofabrik extract and the recipe in `scripts/fetch_tokyo.py`, and place it in the chapter's gallery. Before computing, write down where you expect it to land; explain any gap between prediction and result.
+2. **The minimum cut.** Find the smallest set of stations whose removal disconnects Shibuya from Ueno (`networkx` has `minimum_node_cut`). Does the answer route through the stations you expected? Compare it with the attack sequence's first five and explain the difference between *cutting two points apart* and *shattering everything*.
+3. **Centrality across layers.** Compute betweenness within each operator's subgraph alone, then compare each station's layer-rank with its rank in the full graph. Which stations matter to their company but not to the city? Which matter to the city but not to any single company?
+4. **The weight sensitivity audit.** The chapter showed hop-count and kilometer betweenness disagreeing. Add a third: weight each edge by `km` plus a fixed transfer penalty (say, the equivalent of 1.5 km) on every walk-transfer edge. Which ranking does the penalty move most, and what does that say about Yurakucho's silver medal?
+5. **The breathing network.** Register for ODPT, pull one weekday of timetables for any two operators, and weight this chapter's edges by trains-per-hour at 8 a.m. and at 11 p.m. Recompute the centrality table at both hours. Identify one station whose importance is a rush-hour phenomenon, and one whose importance survives midnight.
 
 ## Further reading {.unnumbered}
 
-*Planned: Barthélemy, "Spatial Networks"; Boeing's OSMnx papers; Newman's "Networks" for foundations.*
+- **Newman, *Networks* (2nd ed., 2018).** The field's standard text; everything this chapter used, with proofs, and most of what it didn't.
+- **Barthélemy, *Spatial Networks* (2022).** Networks that live in geography, where edge lengths cost money and planarity bites; the right second book for urban work.
+- **Boeing, "Urban spatial order: street network orientation, configuration, and entropy" (2019).** The orientation-entropy method and the hundred-city gallery this chapter's thirty-city version descends from; the companion datasets are the chapter's street source.
+- **Alexander, "A City Is Not a Tree" (1965).** The sidebar's subject, worth reading whole — short, hostile to comfortable assumptions, and still correct.
+- **Derrible & Kennedy, "The complexity and robustness of metro networks" (2010).** Percolation thinking applied to 33 metro systems; the comparative context for Tokyo's robust-yet-fragile signature.
